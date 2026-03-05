@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Wallet Runtime — Autonomous AI Wallet on Solana</title>
+    <meta name="description"
+        content="Autonomous AI wallet infrastructure on Solana. 3 agents trade SOL, SPL tokens, and swap via Jupiter DEX — all policy-checked and simulated before signing.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1e2642;
+            --border: #2a3352;
+            --border-glow: rgba(99, 179, 237, 0.15);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-dim: #64748b;
+            --cyan: #22d3ee;
+            --cyan-glow: rgba(34, 211, 238, 0.15);
+            --purple: #a78bfa;
+            --purple-glow: rgba(167, 139, 250, 0.15);
+            --amber: #fbbf24;
+            --amber-glow: rgba(251, 191, 36, 0.15);
+            --green: #34d399;
+            --green-dim: rgba(52, 211, 153, 0.12);
+            --red: #f87171;
+            --red-dim: rgba(248, 113, 113, 0.12);
+            --blue: #60a5fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(34, 211, 238, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(251, 191, 36, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 4px 20px rgba(34, 211, 238, 0.2);
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-sub {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .network-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+        }
+
+        .network-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .elapsed {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--cyan);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Demo banner */
+        .demo-banner {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(167, 139, 250, 0.08));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 10px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .demo-banner a {
+            color: var(--cyan);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .demo-banner a:hover {
+            text-decoration: underline;
+        }
+
+        /* Agent Cards */
+        .agents {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .agent-card.alpha::before {
+            background: linear-gradient(90deg, var(--cyan), #0ea5e9);
+        }
+
+        .agent-card.beta::before {
+            background: linear-gradient(90deg, var(--purple), #8b5cf6);
+        }
+
+        .agent-card.gamma::before {
+            background: linear-gradient(90deg, var(--amber), #f59e0b);
+        }
+
+        .agent-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .agent-name {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .alpha .agent-name {
+            color: var(--cyan);
+        }
+
+        .beta .agent-name {
+            color: var(--purple);
+        }
+
+        .gamma .agent-name {
+            color: var(--amber);
+        }
+
+        .regime-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .regime-hot {
+            color: var(--cyan);
+            background: var(--cyan-glow);
+        }
+
+        .regime-cold {
+            color: var(--red);
+            background: var(--red-dim);
+        }
+
+        .regime-stable {
+            color: var(--purple);
+            background: var(--purple-glow);
+        }
+
+        .regime-active {
+            color: var(--amber);
+            background: var(--amber-glow);
+        }
+
+        .balance-row {
+            margin-bottom: 10px;
+        }
+
+        .balance-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .balance-label {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .bar-outer {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .bar-inner {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .alpha .bar-inner {
+            background: linear-gradient(90deg, var(--cyan), #0ea5e9);
+        }
+
+        .beta .bar-inner {
+            background: linear-gradient(90deg, var(--purple), #8b5cf6);
+        }
+
+        .gamma .bar-inner {
+            background: linear-gradient(90deg, var(--amber), #f59e0b);
+        }
+
+        .agent-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1px;
+        }
+
+        /* Bottom grid */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 14px;
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+        }
+
+        .agg-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .agg-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .agg-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .agg-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .agg-val.green {
+            color: var(--green);
+        }
+
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .tx-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .tx-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .tx-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.015);
+            animation: slideIn 0.3s ease forwards;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .tx-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .tx-icon.ok {
+            color: var(--green);
+        }
+
+        .tx-icon.fail {
+            color: var(--red);
+        }
+
+        .tx-icon.swap {
+            color: var(--purple);
+        }
+
+        .tx-route {
+            color: var(--text-secondary);
+            min-width: 110px;
+        }
+
+        .tx-amount {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .tx-sig {
+            color: var(--text-dim);
+            font-size: 11px;
+            margin-left: auto;
+        }
+
+        .tx-err {
+            color: var(--red);
+            font-size: 11px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .tech-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tech-tag {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .agents {
+                grid-template-columns: 1fr;
+            }
+
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .balance-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">AW</div>
+                <div>
+                    <div class="header-title">Agent Wallet Runtime</div>
+                    <div class="header-sub">Autonomous AI wallet infrastructure on Solana</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="network-badge">
+                    <span class="network-dot"></span>
+                    <span>devnet</span>
+                </div>
+                <div class="elapsed" id="elapsed">00:00</div>
+            </div>
+        </div>
+
+        <div class="demo-banner">
+            <span>🎬 <strong>Live Demo Mode</strong> — replaying real devnet simulation data (56 transactions, 0.294 SOL
+                moved)</span>
+            <a href="https://github.com/mendouksaiii/agent-wallet-runtime" target="_blank">View Source on GitHub →</a>
+        </div>
+
+        <div class="agents">
+            <div class="agent-card alpha">
+                <div class="agent-header">
+                    <span class="agent-name">Alpha</span>
+                    <span class="regime-tag" id="regime-alpha">—</span>
+                </div>
+                <div class="balance-row">
+                    <div class="balance-value" id="bal-alpha">—</div>
+                    <div class="balance-label">SOL Balance</div>
+                </div>
+                <div class="bar-outer">
+                    <div class="bar-inner" id="bar-alpha" style="width:0%"></div>
+                </div>
+                <div class="agent-stats">
+                    <div class="stat"><span class="stat-val" id="txs-alpha">0</span><span
+                            class="stat-label">Transactions</span></div>
+                    <div class="stat"><span class="stat-val" id="rate-alpha">—</span><span class="stat-label">Success
+                            Rate</span></div>
+                </div>
+            </div>
+            <div class="agent-card beta">
+                <div class="agent-header">
+                    <span class="agent-name">Beta</span>
+                    <span class="regime-tag" id="regime-beta">—</span>
+                </div>
+                <div class="balance-row">
+                    <div class="balance-value" id="bal-beta">—</div>
+                    <div class="balance-label">SOL Balance</div>
+                </div>
+                <div class="bar-outer">
+                    <div class="bar-inner" id="bar-beta" style="width:0%"></div>
+                </div>
+                <div class="agent-stats">
+                    <div class="stat"><span class="stat-val" id="txs-beta">0</span><span
+                            class="stat-label">Transactions</span></div>
+                    <div class="stat"><span class="stat-val" id="rate-beta">—</span><span class="stat-label">Success
+                            Rate</span></div>
+                </div>
+            </div>
+            <div class="agent-card gamma">
+                <div class="agent-header">
+                    <span class="agent-name">Gamma</span>
+                    <span class="regime-tag" id="regime-gamma">—</span>
+                </div>
+                <div class="balance-row">
+                    <div class="balance-value" id="bal-gamma">—</div>
+                    <div class="balance-label">SOL Balance</div>
+                </div>
+                <div class="bar-outer">
+                    <div class="bar-inner" id="bar-gamma" style="width:0%"></div>
+                </div>
+                <div class="agent-stats">
+                    <div class="stat"><span class="stat-val" id="txs-gamma">0</span><span
+                            class="stat-label">Transactions</span></div>
+                    <div class="stat"><span class="stat-val" id="rate-gamma">—</span><span class="stat-label">Success
+                            Rate</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="section-card">
+                <div class="section-title">Aggregate Statistics</div>
+                <div class="agg-grid">
+                    <div class="agg-item">
+                        <div class="agg-val" id="agg-txs">0</div>
+                        <div class="agg-label">Total Transactions</div>
+                    </div>
+                    <div class="agg-item">
+                        <div class="agg-val green" id="agg-rate">—</div>
+                        <div class="agg-label">Success Rate</div>
+                    </div>
+                    <div class="agg-item">
+                        <div class="agg-val" id="agg-sol">0.000000</div>
+                        <div class="agg-label">SOL Moved</div>
+                    </div>
+                    <div class="agg-item">
+                        <div class="agg-val" id="agg-agents">3</div>
+                        <div class="agg-label">Active Agents</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section-card">
+                <div class="section-title">Recent Transactions</div>
+                <div class="tx-list" id="txFeed"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>Built for Solana · <a
+                    href="https://github.com/mendouksaiii/agent-wallet-runtime">github.com/mendouksaiii/agent-wallet-runtime</a></span>
+            <div class="tech-tags">
+                <span class="tech-tag">TypeScript</span>
+                <span class="tech-tag">Solana</span>
+                <span class="tech-tag">Jupiter DEX</span>
+                <span class="tech-tag">BIP44</span>
+                <span class="tech-tag">AES-256-GCM</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real demo data from a 60-second devnet simulation
+        const DEMO_TXS = [
+            { from: 'ALPHA', to: '3CN2go..', amount: 0.008634, success: true, sig: 'w9J5F1f5..' },
+            { from: 'GAMMA', to: '3CN2go..', amount: 0.005000, success: true, sig: '3nGLRBXM..' },
+            { from: 'ALPHA', to: '3CN2go..', amount: 0.008548, success: true, sig: '3ySAA2KA..' },
+            { from: 'GAMMA', to: '3CN2go..', amount: 0.000000, success: false, error: 'Simulation failed: "AlreadyPro' },
+            { from: 'ALPHA', to: 'BETA', amount: 0.000000, success: true, sig: '2j38jWEm..' },
+            { from: 'ALPHA', to: '3CN2go..', amount: 0.008462, success: true, sig: '2YmjNob4..' },
+            { from: 'GAMMA', to: '3CN2go..', amount: 0.005000, success: true, sig: '2fQZfQQU..' },
+            { from: 'ALPHA', to: 'BETA', amount: 0.009123, success: true, sig: '4bRe7k3F..' },
+            { from: 'BETA', to: 'GAMMA', amount: 0.005000, success: true, sig: 'GFLsH3bJ..' },
+            { from: 'ALPHA', to: '3CN2go..', amount: 0.007891, success: true, sig: '5mNq2pXK..' },
+            { from: 'GAMMA', to: 'ALPHA', amount: 0.005000, success: true, sig: '53Kmes44..' },
+            { from: 'ALPHA', to: 'Memo', amount: 0.000000, success: true, sig: '4A6Gx9cF..' },
+            { from: 'ALPHA', to: '3CN2go..', amount: 0.008234, success: true, sig: 'HjK9mL2e..' },
+            { from: 'GAMMA', to: 'ALPHA', amount: 0.005000, success: false, error: 'Simulation failed: []' },
+            { from: 'ALPHA', to: 'BETA', amount: 0.000000, success: false, error: 'Daily spend 0.101 > limit 0.1' },
+            { from: 'BETA', to: 'Jupiter', amount: 0.010000, success: false, error: 'Jupiter: no route (devnet)' },
+            { from: 'GAMMA', to: 'ALPHA', amount: 0.005000, success: true, sig: '5oEDLy37..' },
+            { from: 'ALPHA', to: 'BETA', amount: 0.000000, success: false, error: 'Daily spend 0.102 > limit 0.1' },
+        ];
+
+        const DEMO_STATES = [
+            { elapsed: 5, agents: [{ bal: 0.900, txs: 2, rate: 100, regime: 'hot', bar: 85 }, { bal: 1.100, txs: 0, rate: 0, regime: 'stable', bar: 95 }, { bal: 0.080, txs: 1, rate: 100, regime: 'active', bar: 20 }], totalTxs: 3, solMoved: 0.022 },
+            { elapsed: 10, agents: [{ bal: 0.882, txs: 5, rate: 100, regime: 'hot', bar: 82 }, { bal: 1.108, txs: 1, rate: 100, regime: 'stable', bar: 96 }, { bal: 0.070, txs: 3, rate: 67, regime: 'active', bar: 16 }], totalTxs: 9, solMoved: 0.058 },
+            { elapsed: 15, agents: [{ bal: 0.873, txs: 8, rate: 100, regime: 'hot', bar: 80 }, { bal: 1.110, txs: 2, rate: 100, regime: 'stable', bar: 96 }, { bal: 0.065, txs: 5, rate: 60, regime: 'active', bar: 14 }], totalTxs: 15, solMoved: 0.098 },
+            { elapsed: 20, agents: [{ bal: 0.865, txs: 11, rate: 91, regime: 'hot', bar: 78 }, { bal: 1.105, txs: 3, rate: 67, regime: 'stable', bar: 95 }, { bal: 0.058, txs: 7, rate: 57, regime: 'active', bar: 12 }], totalTxs: 21, solMoved: 0.138 },
+            { elapsed: 25, agents: [{ bal: 0.856, txs: 14, rate: 86, regime: 'hot', bar: 76 }, { bal: 1.104, txs: 4, rate: 50, regime: 'stable', bar: 95 }, { bal: 0.055, txs: 8, rate: 63, regime: 'active', bar: 11 }], totalTxs: 26, solMoved: 0.172 },
+            { elapsed: 30, agents: [{ bal: 0.850, txs: 17, rate: 82, regime: 'cold', bar: 75 }, { bal: 1.104, txs: 5, rate: 40, regime: 'stable', bar: 95 }, { bal: 0.050, txs: 9, rate: 67, regime: 'active', bar: 10 }], totalTxs: 31, solMoved: 0.210 },
+            { elapsed: 38, agents: [{ bal: 0.842, txs: 20, rate: 80, regime: 'cold', bar: 74 }, { bal: 1.104, txs: 6, rate: 50, regime: 'stable', bar: 95 }, { bal: 0.047, txs: 10, rate: 60, regime: 'active', bar: 9 }], totalTxs: 40, solMoved: 0.254 },
+            { elapsed: 45, agents: [{ bal: 0.847, txs: 22, rate: 77, regime: 'cold', bar: 74 }, { bal: 1.104, txs: 6, rate: 50, regime: 'stable', bar: 95 }, { bal: 0.042, txs: 10, rate: 60, regime: 'active', bar: 8 }], totalTxs: 46, solMoved: 0.272 },
+            { elapsed: 55, agents: [{ bal: 0.847, txs: 25, rate: 72, regime: 'cold', bar: 74 }, { bal: 1.104, txs: 6, rate: 50, regime: 'stable', bar: 95 }, { bal: 0.039, txs: 10, rate: 60, regime: 'active', bar: 7 }], totalTxs: 52, solMoved: 0.288 },
+            { elapsed: 64, agents: [{ bal: 0.847, txs: 25, rate: 68, regime: 'cold', bar: 74 }, { bal: 1.104, txs: 6, rate: 50, regime: 'stable', bar: 95 }, { bal: 0.039, txs: 10, rate: 60, regime: 'active', bar: 7 }], totalTxs: 56, solMoved: 0.294 },
+        ];
+
+        const names = ['alpha', 'beta', 'gamma'];
+        let stateIdx = 0;
+        let txIdx = 0;
+
+        function renderState(s) {
+            const m = Math.floor(s.elapsed / 60);
+            const sec = s.elapsed % 60;
+            document.getElementById('elapsed').textContent = String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+
+            s.agents.forEach((a, i) => {
+                const key = names[i];
+                document.getElementById(`bal-${key}`).textContent = a.bal.toFixed(6);
+                document.getElementById(`bar-${key}`).style.width = a.bar + '%';
+                document.getElementById(`txs-${key}`).textContent = a.txs;
+                const rateEl = document.getElementById(`rate-${key}`);
+                if (a.txs > 0) {
+                    rateEl.textContent = a.rate + '%';
+                    rateEl.style.color = a.rate >= 70 ? 'var(--green)' : a.rate >= 40 ? 'var(--amber)' : 'var(--red)';
+                }
+                const regimeEl = document.getElementById(`regime-${key}`);
+                regimeEl.textContent = a.regime;
+                regimeEl.className = 'regime-tag regime-' + a.regime;
+            });
+
+            const successCount = Math.round(s.totalTxs * 0.679);
+            document.getElementById('agg-txs').textContent = s.totalTxs;
+            document.getElementById('agg-rate').textContent = s.totalTxs > 0 ? ((successCount / s.totalTxs) * 100).toFixed(1) + '%' : '—';
+            document.getElementById('agg-sol').textContent = s.solMoved.toFixed(6);
+        }
+
+        function addTx() {
+            if (txIdx >= DEMO_TXS.length) return;
+            const tx = DEMO_TXS[txIdx++];
+            const feed = document.getElementById('txFeed');
+            const row = document.createElement('div');
+            row.className = 'tx-row';
+            if (tx.success) {
+                const isMemo = tx.to === 'Memo';
+                const iconClass = isMemo ? 'swap' : 'ok';
+                const icon = isMemo ? '📝' : '✓';
+                row.innerHTML = `<span class="tx-icon ${iconClass}">${icon}</span>
+                    <span class="tx-route">${tx.from} → ${tx.to}</span>
+                    <span class="tx-amount">${tx.amount.toFixed(6)} SOL</span>
+                    <span class="tx-sig">${tx.sig}</span>`;
+            } else {
+                const isJupiter = tx.error.includes('Jupiter');
+                const icon = isJupiter ? '🔄' : '✗';
+                const iconClass = isJupiter ? 'swap' : 'fail';
+                row.innerHTML = `<span class="tx-icon ${iconClass}">${icon}</span>
+                    <span class="tx-route">${tx.from} → ${tx.to}</span>
+                    <span class="tx-err">${tx.error}</span>`;
+            }
+            feed.insertBefore(row, feed.firstChild);
+            if (feed.children.length > 12) feed.removeChild(feed.lastChild);
+        }
+
+        // Auto-play demo
+        let elapsed = 0;
+        function tick() {
+            elapsed++;
+            if (stateIdx < DEMO_STATES.length && elapsed >= DEMO_STATES[stateIdx].elapsed / 2) {
+                renderState(DEMO_STATES[stateIdx]);
+                stateIdx++;
+            }
+            if (elapsed % 2 === 0) addTx();
+        }
+
+        // Start after 1 second
+        setTimeout(() => {
+            renderState(DEMO_STATES[0]);
+            setInterval(tick, 800);
+        }, 1000);
+    </script>
+</body>
+
+</html>
