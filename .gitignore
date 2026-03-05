@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.enc
+agents.db
+logs/
+.env
+*.log

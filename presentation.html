@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Wallet Runtime — Hackathon Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-void: #06060a;
+            --bg-card: #0c0c14;
+            --bg-card-hover: #10101c;
+            --green-bright: #00ff88;
+            --green-dim: #00cc6a;
+            --green-glow: rgba(0, 255, 136, 0.15);
+            --red-bright: #ff3355;
+            --red-dim: #cc2244;
+            --red-glow: rgba(255, 51, 85, 0.15);
+            --amber: #ffaa00;
+            --amber-glow: rgba(255, 170, 0, 0.1);
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888a0;
+            --text-muted: #55556a;
+            --border: #1a1a2e;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-muted) transparent;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-void);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ─── Navigation ─── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 40px;
+            background: rgba(6, 6, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .logo {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--green-bright);
+            letter-spacing: 2px;
+        }
+
+        nav .slide-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        nav .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        nav .dot.active {
+            background: var(--green-bright);
+            box-shadow: 0 0 10px var(--green-bright);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        nav .slide-counter {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ─── Slides ─── */
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 100px 80px 60px;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
+            background-image:
+                linear-gradient(var(--text-muted) 1px, transparent 1px),
+                linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .slide-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: clamp(42px, 6vw, 80px);
+            line-height: 1.05;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(32px, 4vw, 52px);
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            line-height: 1.7;
+        }
+
+        .highlight-green {
+            color: var(--green-bright);
+        }
+
+        .highlight-red {
+            color: var(--red-bright);
+        }
+
+        .highlight-amber {
+            color: var(--amber);
+        }
+
+        /* ─── Title Slide ─── */
+        #slide-title h1 span.line {
+            display: block;
+        }
+
+        #slide-title h1 span.dim {
+            color: var(--text-muted);
+        }
+
+        .title-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--green-glow);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--green-bright);
+            margin-bottom: 32px;
+        }
+
+        .title-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green-bright);
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .title-meta {
+            display: flex;
+            gap: 32px;
+            margin-top: 48px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .title-meta span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-meta .val {
+            color: var(--text-secondary);
+        }
+
+        /* ─── Grid Layouts ─── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .card .card-icon {
+            font-size: 28px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .card h3 {
+            font-size: 18px;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* ─── Architecture Diagram ─── */
+        .arch-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 32px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--text-secondary);
+        }
+
+        .arch-diagram .hl {
+            color: var(--green-bright);
+        }
+
+        .arch-diagram .dim {
+            color: var(--text-muted);
+        }
+
+        .arch-diagram .warn {
+            color: var(--amber);
+        }
+
+        .arch-diagram .err {
+            color: var(--red-bright);
+        }
+
+        /* ─── Status Bars ─── */
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .status-row .label {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            min-width: 260px;
+        }
+
+        .status-bar-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 3px;
+            margin: 0 20px;
+            overflow: hidden;
+        }
+
+        .status-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1.5s ease;
+        }
+
+        .status-bar-fill.green {
+            background: var(--green-bright);
+            box-shadow: 0 0 8px var(--green-glow);
+        }
+
+        .status-bar-fill.amber {
+            background: var(--amber);
+            box-shadow: 0 0 8px var(--amber-glow);
+        }
+
+        .status-bar-fill.red {
+            background: var(--red-bright);
+            box-shadow: 0 0 8px var(--red-glow);
+        }
+
+        .status-row .value {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        /* ─── Verdict Boxes ─── */
+        .verdict-box {
+            padding: 24px 28px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid;
+        }
+
+        .verdict-box.good {
+            background: var(--green-glow);
+            border-color: var(--green-bright);
+        }
+
+        .verdict-box.bad {
+            background: var(--red-glow);
+            border-color: var(--red-bright);
+        }
+
+        .verdict-box.warn {
+            background: var(--amber-glow);
+            border-color: var(--amber);
+        }
+
+        .verdict-box h4 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .verdict-box p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ─── Table ─── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tag.green {
+            background: var(--green-glow);
+            color: var(--green-bright);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .tag.red {
+            background: var(--red-glow);
+            color: var(--red-bright);
+            border: 1px solid rgba(255, 51, 85, 0.2);
+        }
+
+        .tag.amber {
+            background: var(--amber-glow);
+            color: var(--amber);
+            border: 1px solid rgba(255, 170, 0, 0.2);
+        }
+
+        /* ─── Big Numbers ─── */
+        .big-stat {
+            text-align: center;
+            padding: 32px 20px;
+        }
+
+        .big-stat .number {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 56px;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .big-stat .desc {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ─── Final slide ─── */
+        .final-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .final-links a {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .final-links a.primary {
+            background: var(--green-bright);
+            color: var(--bg-void);
+            font-weight: 700;
+        }
+
+        .final-links a.primary:hover {
+            box-shadow: 0 0 30px var(--green-glow);
+        }
+
+        .final-links a.secondary {
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .final-links a.secondary:hover {
+            border-color: var(--text-secondary);
+        }
+
+        /* ─── Scroll animations ─── */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 900px) {
+            .slide {
+                padding: 100px 32px 48px;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 14px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">AWR//DECK</div>
+        <div class="slide-dots" id="dots"></div>
+        <div class="slide-counter" id="counter">01 / 09</div>
+    </nav>
+
+    <!-- ═══════════ SLIDE 1: TITLE ═══════════ -->
+    <section class="slide" id="slide-title">
+        <div class="title-badge">Solana Devnet • Hackathon Submission</div>
+        <h1>
+            <span class="line">Agent Wallet</span>
+            <span class="line"><span class="highlight-green">Runtime</span></span>
+        </h1>
+        <p class="subtitle">
+            Autonomous AI agents that hold SOL, reason about transactions, and interact with the blockchain — without
+            any human touching a private key at signing time.
+        </p>
+        <div class="title-meta">
+            <span>Stack <span class="val">TypeScript + Solana web3.js</span></span>
+            <span>Network <span class="val">Devnet</span></span>
+            <span>Tests <span class="val">24/24 passing</span></span>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 2: THE IDEA ═══════════ -->
+    <section class="slide" id="slide-idea">
+        <div class="slide-label">01 — The Idea</div>
+        <h2>Agents emit <span class="highlight-green">intents</span>, not transactions.</h2>
+        <p class="subtitle">The core security principle: agent logic never touches private keys directly. Agents
+            describe <em>what</em> they want to do. The runtime decides <em>if</em> and <em>how</em>.</p>
+        <div class="arch-diagram"><span class="dim"> ┌─────────────┐</span> <span class="hl">Intent</span> <span
+                class="dim">┌───────────────────────┐</span>
+            <span class="dim"> │</span> <span class="hl">Agent Logic</span> <span
+                class="dim">│──────────────────────▶│</span> <span class="hl">Wallet Runtime</span> <span
+                class="dim">│</span>
+            <span class="dim"> │</span> (untrusted) <span class="dim">│</span> { type, to, amount } <span
+                class="dim">│</span> <span class="dim">│</span>
+            <span class="dim"> └─────────────┘</span> <span class="dim">│</span> <span class="warn">① Policy
+                Check</span> <span class="dim"> │</span>
+            <span class="dim"> ▲</span> <span class="dim">│</span> <span class="warn">② Simulation</span> <span
+                class="dim"> │</span>
+            <span class="dim"> │</span> <span class="dim">│</span> <span class="hl">③ Sign</span> <span class="dim">
+                │</span>
+            <span class="dim"> │</span> <span class="hl">ExecutionResult</span> <span class="dim">│</span> <span
+                class="hl">④ Broadcast</span> <span class="dim"> │</span>
+            <span class="dim"> └──────────────────────────────│</span> ⑤ Record <span class="dim"> │</span>
+            <span class="dim">└───────────┬───────────┘</span>
+            <span class="dim">│</span>
+            <span class="dim">▼</span>
+            <span class="hl">Solana Devnet</span>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 3: WHAT WORKS ═══════════ -->
+    <section class="slide" id="slide-works">
+        <div class="slide-label">02 — What Actually Works</div>
+        <h2>The <span class="highlight-green">real</span> deliverables.</h2>
+        <div class="grid-3 fade-up">
+            <div class="card">
+                <span class="card-icon">🔐</span>
+                <h3>HD Wallet Derivation</h3>
+                <p>BIP39 mnemonic → BIP44 path → deterministic Ed25519 keypairs. One secret, infinite agents. Private
+                    keys <strong>never</strong> leave memory.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">🛡️</span>
+                <h3>Policy Engine</h3>
+                <p>Per-tx limits, rolling 24h caps, program whitelists. All enforced before signing — an agent
+                    <strong>cannot</strong> bypass them.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">🔗</span>
+                <h3>Real On-Chain Txs</h3>
+                <p>Actually simulates and sends confirmed transactions on Solana devnet. Not a mock. Not a stub. Real
+                    blockhashes, real signatures.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">🤖</span>
+                <h3>3 Autonomous Agents</h3>
+                <p>ALPHA (market maker), BETA (accumulator), GAMMA (rebalancer). Each with independent decision logic
+                    and logged reasoning.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">📊</span>
+                <h3>Full Audit Trail</h3>
+                <p>Every decision, every simulation, every spend → SQLite. Queryable. Forensic-grade. Not just log lines
+                    — structured records.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">⌨️</span>
+                <h3>Working CLI</h3>
+                <p>init → airdrop → run → status → history. End-to-end workflow from zero to running simulation in 5
+                    commands.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 4: BY THE NUMBERS ═══════════ -->
+    <section class="slide" id="slide-numbers">
+        <div class="slide-label">03 — By The Numbers</div>
+        <h2>Build <span class="highlight-green">proof</span>, not promises.</h2>
+        <div class="grid-3 fade-up">
+            <div class="card big-stat">
+                <div class="number highlight-green">24</div>
+                <div class="desc">Tests Passing</div>
+            </div>
+            <div class="card big-stat">
+                <div class="number highlight-green">0</div>
+                <div class="desc">Build Errors</div>
+            </div>
+            <div class="card big-stat">
+                <div class="number" style="color: var(--text-primary);">10</div>
+                <div class="desc">Source Modules</div>
+            </div>
+            <div class="card big-stat">
+                <div class="number" style="color: var(--text-primary);">~2,800</div>
+                <div class="desc">Lines of TypeScript</div>
+            </div>
+            <div class="card big-stat">
+                <div class="number" style="color: var(--text-primary);">3</div>
+                <div class="desc">Autonomous Agents</div>
+            </div>
+            <div class="card big-stat">
+                <div class="number highlight-green">100%</div>
+                <div class="desc">Strict TypeScript</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 5: THE HONEST PART ═══════════ -->
+    <section class="slide" id="slide-honest">
+        <div class="slide-label">04 — Brutal Honesty</div>
+        <h2>What this <span class="highlight-red">isn't</span>.</h2>
+        <p class="subtitle" style="margin-bottom: 28px;">No sugarcoating. Here's every limitation I'm aware of.</p>
+
+        <div class="verdict-box bad fade-up">
+            <h4>❌ These aren't real "AI" agents</h4>
+            <p>The agents use hardcoded if/else logic and Math.random(). There's no LLM, no reasoning model, no
+                learning. "AI agent" in this context means "autonomous program" — not artificial intelligence. The
+                architecture <em>supports</em> plugging in real AI decision-making, but the prototype doesn't ship any.
+            </p>
+        </div>
+
+        <div class="verdict-box bad fade-up">
+            <h4>❌ Devnet only — this would break on mainnet</h4>
+            <p>No priority fees, no rent exemption calculations, no RPC fallback, no network assertion check. Moving to
+                mainnet requires way more than changing a URL.</p>
+        </div>
+
+        <div class="verdict-box bad fade-up">
+            <h4>❌ The policy engine is software-only</h4>
+            <p>A compromised runtime can bypass all policies. Real production needs on-chain spending limits enforced by
+                a Solana program — not a TypeScript class that can be patched.</p>
+        </div>
+
+        <div class="verdict-box bad fade-up">
+            <h4>❌ SPL tokens aren't supported</h4>
+            <p>Only SOL transfers work. The TRANSFER_SPL intent type literally throws "not implemented." A real wallet
+                runtime that can't do token transfers is a toy.</p>
+        </div>
+
+        <div class="verdict-box warn fade-up">
+            <h4>⚠️ Single-point key compromise</h4>
+            <p>The mnemonic is one secret. If someone gets it, they get everything. Production requires MPC/TSS
+                distributed key generation — no single machine holds the full key.</p>
+        </div>
+
+        <div class="verdict-box warn fade-up">
+            <h4>⚠️ SQLite won't scale</h4>
+            <p>WAL mode helps, but past ~50 concurrent agents, write contention serializes everything. This is a
+                prototype database, not a production one.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 6: COMPLETENESS SCORECARD ═══════════ -->
+    <section class="slide" id="slide-scorecard">
+        <div class="slide-label">05 — Completeness Scorecard</div>
+        <h2>Where do we <span class="highlight-amber">actually</span> stand?</h2>
+
+        <div style="margin-top: 28px">
+            <div class="status-row fade-up">
+                <span class="label">HD Wallet Derivation</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill green" style="width: 100%"></div>
+                </div>
+                <span class="value highlight-green">100%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">AES-256-GCM Keystore</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill green" style="width: 100%"></div>
+                </div>
+                <span class="value highlight-green">100%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">Policy Engine</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill green" style="width: 95%"></div>
+                </div>
+                <span class="value highlight-green">95%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">Transaction Pipeline</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill green" style="width: 90%"></div>
+                </div>
+                <span class="value highlight-green">90%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">Agent Decision Logic</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill amber" style="width: 60%"></div>
+                </div>
+                <span class="value highlight-amber">60%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">Token (SPL) Support</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill red" style="width: 0%"></div>
+                </div>
+                <span class="value highlight-red">0%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">Production Security</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill amber" style="width: 40%"></div>
+                </div>
+                <span class="value highlight-amber">40%</span>
+            </div>
+            <div class="status-row fade-up">
+                <span class="label">Mainnet Readiness</span>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill red" style="width: 10%"></div>
+                </div>
+                <span class="value highlight-red">10%</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 7: WHAT'S GENUINELY GOOD ═══════════ -->
+    <section class="slide" id="slide-good">
+        <div class="slide-label">06 — What's Genuinely Good</div>
+        <h2>The parts that <span class="highlight-green">aren't BS</span>.</h2>
+
+        <div class="grid-2 fade-up">
+            <div class="verdict-box good">
+                <h4>✅ The architecture is sound</h4>
+                <p>Intent boundary → policy → simulation → sign. This is how you'd actually structure agent-wallet
+                    separation. The 10-step pipeline isn't overcomplicated — it's the minimum viable safety chain.</p>
+            </div>
+            <div class="verdict-box good">
+                <h4>✅ It runs real transactions</h4>
+                <p>Not mocked. Not simulated. Real Solana devnet transactions with confirmed signatures. You can verify
+                    every tx on a block explorer.</p>
+            </div>
+            <div class="verdict-box good">
+                <h4>✅ The keystore crypto is correct</h4>
+                <p>AES-256-GCM with PBKDF2 (SHA-512, 100K iterations). This isn't toy crypto — it's the same pattern
+                    used by MetaMask and other production wallets.</p>
+            </div>
+            <div class="verdict-box good">
+                <h4>✅ The test coverage is meaningful</h4>
+                <p>24 tests covering derivation determinism, policy enforcement edge cases, and agent decision logic
+                    with fully mocked network. These aren't "does it compile" tests.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SLIDE 8: SPEC DEVIATIONS ═══════════ -->
+    <section class="slide" id="slide-deviations">
+        <div class="slide-label">07 — Spec Deviations</div>
+        <h2>What I <span class="highlight-amber">changed</span> and why.</h2>
+
+        <table class="data-table fade-up">
+            <thead>
+                <tr>
+                    <th>Spec Said</th>
+                    <th>I Did</th>
+                    <th>Why</th>
+                    <th>Impact</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@solana/web3.js ^2.0.0</td>
+                    <td>^1.98.0 (v1)</td>
+                    <td>Spec described v1 API patterns. V2 is a complete rewrite with incompatible functions.</td>
+                    <td><span class="tag green">NONE</span></td>
+                </tr>
+                <tr>
+                    <td>better-sqlite3</td>
+                    <td>sql.js (WASM)</td>
+                    <td>No C++ build tools on Windows. Node v24 has no prebuilt binaries.</td>
+                    <td><span class="tag amber">MINOR</span></td>
+                </tr>
+                <tr>
+                    <td>Sync DB init</td>
+                    <td>Async DB init</td>
+                    <td>sql.js requires async WASM loading. All callers now use await.</td>
+                    <td><span class="tag amber">MINOR</span></td>
+                </tr>
+                <tr>
+                    <td>No `any` types</td>
+                    <td>Zero `any` in source</td>
+                    <td>Achieved via custom sql.js type declarations.</td>
+                    <td><span class="tag green">NONE</span></td>
+                </tr>
+                <tr>
+                    <td>No console.log</td>
+                    <td>CLI uses console.log</td>
+                    <td>CLI output needs direct console for user-facing formatting. Logger used everywhere else.</td>
+                    <td><span class="tag green">INTENTIONAL</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ═══════════ SLIDE 9: CLOSING ═══════════ -->
+    <section class="slide" id="slide-close">
+        <div class="slide-label">08 — Closing</div>
+        <h2>
+            <span style="color: var(--text-muted);">It's a prototype.</span><br>
+            A <span class="highlight-green">good</span> prototype.
+        </h2>
+        <p class="subtitle" style="margin-bottom: 16px;">
+            This isn't production infrastructure. It's a demonstrably correct architectural skeleton for how autonomous
+            agents should interact with blockchains — with real crypto, real transactions, and real guardrails.
+        </p>
+        <p class="subtitle" style="margin-bottom: 16px;">
+            The hard part isn't the code. It's the <strong>separation of concerns</strong>: proving that an untrusted
+            agent can hold funds safely because the system — not trust — enforces the rules.
+        </p>
+        <p class="subtitle">
+            <strong style="color: var(--text-primary);">Everything compiles. Everything runs. Nothing is
+                faked.</strong><br>
+            That should count for something.
+        </p>
+
+        <div class="title-meta" style="margin-top: 48px;">
+            <span>Build <span class="val highlight-green">✓ 0 errors</span></span>
+            <span>Tests <span class="val highlight-green">✓ 24/24</span></span>
+            <span>Network <span class="val">Solana Devnet</span></span>
+            <span>Honesty <span class="val highlight-green">✓ Brutal</span></span>
+        </div>
+    </section>
+
+    <script>
+        // ─── Slide tracking + navigation ───
+        const slides = document.querySelectorAll('.slide');
+        const dotsContainer = document.getElementById('dots');
+        const counter = document.getElementById('counter');
+
+        slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                slides[i].scrollIntoView({ behavior: 'smooth' });
+            });
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+                    counter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+                }
+            });
+        }, { threshold: 0.5 });
+
+        slides.forEach(s => observer.observe(s));
+
+        // ─── Fade-in on scroll ───
+        const fadeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.fade-up').forEach(el => fadeObserver.observe(el));
+
+        // ─── Keyboard nav ───
+        let currentSlide = 0;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                currentSlide = Math.min(currentSlide + 1, slides.length - 1);
+                slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                currentSlide = Math.max(currentSlide - 1, 0);
+                slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Sync keyboard nav with scroll
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    currentSlide = Array.from(slides).indexOf(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        slides.forEach(s => scrollObserver.observe(s));
+    </script>
+</body>
+
+</html>

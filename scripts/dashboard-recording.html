@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Agent Wallet Runtime — Live Dashboard Recording</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 24px;
+            min-height: 100vh;
+            font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 13px;
+            color: #c9d1d9;
+        }
+
+        .terminal {
+            background: #0d1117;
+            border: 1.5px solid #30363d;
+            border-radius: 10px;
+            width: 740px;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .titlebar {
+            background: #161b22;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.r {
+            background: #ff5f57;
+        }
+
+        .dot.y {
+            background: #febc2e;
+        }
+
+        .dot.g {
+            background: #28c840;
+        }
+
+        .titlebar-text {
+            color: #6e7681;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .body {
+            padding: 16px 18px;
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #1f6feb;
+            border-radius: 4px;
+            padding: 6px 12px;
+            margin-bottom: 14px;
+            color: #58a6ff;
+        }
+
+        .header .title {
+            font-weight: 700;
+            color: #f0f6fc;
+        }
+
+        .header .meta {
+            color: #6e7681;
+            font-size: 12px;
+        }
+
+        .header .elapsed {
+            color: #58a6ff;
+            font-weight: 700;
+        }
+
+        /* Agent cards */
+        .agents {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .agent-card {
+            flex: 1;
+            border: 1px solid;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+
+        .agent-card.alpha {
+            border-color: #39d2e0;
+        }
+
+        .agent-card.beta {
+            border-color: #bc8cff;
+        }
+
+        .agent-card.gamma {
+            border-color: #d29922;
+        }
+
+        .agent-name {
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .agent-card.alpha .agent-name {
+            color: #39d2e0;
+        }
+
+        .agent-card.beta .agent-name {
+            color: #bc8cff;
+        }
+
+        .agent-card.gamma .agent-name {
+            color: #d29922;
+        }
+
+        .balance {
+            font-weight: 700;
+            color: #f0f6fc;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .bar {
+            height: 8px;
+            border-radius: 3px;
+            flex: 1;
+            background: #21262d;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: #3fb950;
+            transition: width 1s ease;
+        }
+
+        .bar-pct {
+            color: #6e7681;
+            font-size: 11px;
+            min-width: 32px;
+            text-align: right;
+        }
+
+        .regime {
+            display: inline-block;
+            font-size: 11px;
+            padding: 1px 8px;
+            border-radius: 3px;
+            margin-bottom: 4px;
+        }
+
+        .regime.hot {
+            color: #39d2e0;
+            background: rgba(57, 210, 224, 0.12);
+        }
+
+        .regime.cold {
+            color: #f85149;
+            background: rgba(248, 81, 73, 0.12);
+        }
+
+        .regime.normal {
+            color: #8b949e;
+            background: rgba(139, 148, 158, 0.12);
+        }
+
+        .regime.stable {
+            color: #bc8cff;
+            background: rgba(188, 140, 255, 0.12);
+        }
+
+        .regime.rising {
+            color: #3fb950;
+            background: rgba(63, 185, 80, 0.12);
+        }
+
+        .regime.active {
+            color: #d29922;
+            background: rgba(210, 153, 34, 0.12);
+        }
+
+        .regime.observing {
+            color: #6e7681;
+            background: rgba(110, 118, 129, 0.12);
+        }
+
+        .tx-stat {
+            color: #8b949e;
+            font-size: 12px;
+        }
+
+        .tx-stat .rate {
+            font-weight: 700;
+        }
+
+        .tx-stat .rate.high {
+            color: #3fb950;
+        }
+
+        .tx-stat .rate.mid {
+            color: #d29922;
+        }
+
+        .tx-stat .rate.low {
+            color: #f85149;
+        }
+
+        /* Aggregate */
+        .section-label {
+            color: #6e7681;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 4px;
+        }
+
+        .aggregate {
+            display: flex;
+            gap: 28px;
+            margin-bottom: 14px;
+            padding: 4px 0;
+        }
+
+        .agg-item label {
+            color: #6e7681;
+            font-size: 11px;
+        }
+
+        .agg-item .val {
+            font-weight: 700;
+            color: #f0f6fc;
+            font-size: 15px;
+        }
+
+        .agg-item .val.green {
+            color: #3fb950;
+        }
+
+        /* Transactions */
+        .tx-feed {
+            margin-top: 4px;
+        }
+
+        .tx-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0;
+            font-size: 12px;
+            opacity: 0;
+            transform: translateY(-6px);
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tx-icon {
+            font-size: 14px;
+        }
+
+        .tx-icon.ok {
+            color: #3fb950;
+        }
+
+        .tx-icon.fail {
+            color: #f85149;
+        }
+
+        .tx-route {
+            color: #c9d1d9;
+            min-width: 130px;
+        }
+
+        .tx-amount {
+            color: #f0f6fc;
+            font-weight: 700;
+            min-width: 120px;
+        }
+
+        .tx-sig {
+            color: #484f58;
+            font-size: 11px;
+        }
+
+        .tx-err {
+            color: #f85149;
+            font-size: 11px;
+        }
+
+        /* Status bar */
+        .status-bar {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #21262d;
+            display: flex;
+            justify-content: space-between;
+            color: #484f58;
+            font-size: 10px;
+        }
+
+        .status-bar .live {
+            color: #3fb950;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="terminal">
+        <div class="titlebar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="titlebar-text">npx agent-wallet run --password ••••• --duration 120 --dashboard</span>
+        </div>
+        <div class="body">
+
+            <!-- Header -->
+            <div class="header">
+                <div><span class="title">Agent Wallet Runtime</span></div>
+                <div class="meta">devnet · <span class="elapsed" id="elapsed">00:00</span></div>
+            </div>
+
+            <!-- Agent Cards -->
+            <div class="agents">
+                <div class="agent-card alpha">
+                    <div class="agent-name">◆ ALPHA</div>
+                    <div class="balance" id="alpha-bal">0.982060 SOL</div>
+                    <div class="bar-container">
+                        <div class="bar">
+                            <div class="bar-fill" id="alpha-bar" style="width:100%"></div>
+                        </div>
+                        <span class="bar-pct" id="alpha-pct">100%</span>
+                    </div>
+                    <div><span class="regime normal" id="alpha-regime">normal</span></div>
+                    <div class="tx-stat"><span id="alpha-txs">0</span> txs · <span class="rate high"
+                            id="alpha-rate">—%</span></div>
+                </div>
+                <div class="agent-card beta">
+                    <div class="agent-name">◆ BETA</div>
+                    <div class="balance" id="beta-bal">0.927895 SOL</div>
+                    <div class="bar-container">
+                        <div class="bar">
+                            <div class="bar-fill" id="beta-bar" style="width:100%"></div>
+                        </div>
+                        <span class="bar-pct" id="beta-pct">100%</span>
+                    </div>
+                    <div><span class="regime stable" id="beta-regime">stable</span></div>
+                    <div class="tx-stat"><span id="beta-txs">0</span> txs · <span class="rate high"
+                            id="beta-rate">—%</span></div>
+                </div>
+                <div class="agent-card gamma">
+                    <div class="agent-name">◆ GAMMA</div>
+                    <div class="balance" id="gamma-bal">0.090000 SOL</div>
+                    <div class="bar-container">
+                        <div class="bar">
+                            <div class="bar-fill" id="gamma-bar" style="width:100%"></div>
+                        </div>
+                        <span class="bar-pct" id="gamma-pct">100%</span>
+                    </div>
+                    <div><span class="regime observing" id="gamma-regime">observing</span></div>
+                    <div class="tx-stat"><span id="gamma-txs">0</span> txs · <span class="rate mid"
+                            id="gamma-rate">—%</span></div>
+                </div>
+            </div>
+
+            <!-- Aggregate -->
+            <div class="section-label">Aggregate Statistics</div>
+            <div class="aggregate">
+                <div class="agg-item"><label>Transactions</label>
+                    <div class="val" id="agg-txs">0</div>
+                </div>
+                <div class="agg-item"><label>Success Rate</label>
+                    <div class="val green" id="agg-rate">—%</div>
+                </div>
+                <div class="agg-item"><label>SOL Moved</label>
+                    <div class="val" id="agg-sol">0.000000</div>
+                </div>
+            </div>
+
+            <!-- Transaction Feed -->
+            <div class="section-label">Recent Transactions</div>
+            <div class="tx-feed" id="tx-feed">
+                <div class="tx-row" style="opacity:1;transform:none;color:#484f58;">Waiting for agent cycles...</div>
+            </div>
+
+            <div class="status-bar">
+                <span><span class="live">● LIVE</span> · Solana Devnet</span>
+                <span>Ctrl+C to stop</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulation script — replays realistic 30s of agent activity
+        const SCENARIO = [
+            { t: 3, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.004821, sig: '3Agxho4f', regime: 'normal', success: true },
+            { t: 5, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.005123, sig: 'p3mJVm7a', regime: 'normal', success: true },
+            { t: 7, agent: 'BETA', action: 'hold', regime: 'stable' },
+            { t: 9, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.009722, sig: '2vi4xZ9h', regime: 'hot', success: true },
+            { t: 11, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.009821, sig: '2ktAf2xs', regime: 'hot', success: true },
+            { t: 13, agent: 'BETA', action: 'send', to: 'GAMMA', amt: 0.030000, sig: '5fSHKpzF', regime: 'rising', success: true },
+            { t: 15, agent: 'GAMMA', action: 'send', to: 'ALPHA', amt: 0.005000, sig: '4peR8uYE', regime: 'active', success: true },
+            { t: 17, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.009625, sig: '7YmqB2ks', regime: 'hot', success: true },
+            { t: 19, agent: 'GAMMA', action: 'send', to: 'BETA', amt: 0.005000, sig: '', regime: 'active', success: false, err: 'AlreadyProcessed' },
+            { t: 21, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.008344, sig: '9RtpK3wv', regime: 'hot', success: true },
+            { t: 23, agent: 'BETA', action: 'send', to: 'GAMMA', amt: 0.025000, sig: 'Hk7aVdfQ', regime: 'rising', success: true },
+            { t: 25, agent: 'GAMMA', action: 'send', to: 'ALPHA', amt: 0.010000, sig: 'XnB4r9qZ', regime: 'active', success: true },
+            { t: 26, agent: 'ALPHA', action: 'memo', regime: 'hot', memo: 'PROGRAM_CALL: Memo logged' },
+            { t: 28, agent: 'ALPHA', action: 'send', to: 'BETA', amt: 0.009500, sig: 'Fm3kZp8W', regime: 'hot', success: true },
+            { t: 30, agent: 'BETA', action: 'hold', regime: 'stable' },
+        ];
+
+        const state = {
+            alpha: { bal: 0.982060, txs: 0, successes: 0, regime: 'normal', startBal: 0.982060 },
+            beta: { bal: 0.927895, txs: 0, successes: 0, regime: 'stable', startBal: 0.927895 },
+            gamma: { bal: 0.090000, txs: 0, successes: 0, regime: 'observing', startBal: 0.090000 },
+        };
+
+        let totalTxs = 0, totalSuccess = 0, totalSol = 0;
+        let elapsed = 0;
+        let scenarioIdx = 0;
+
+        function updateUI() {
+            document.getElementById('elapsed').textContent =
+                String(Math.floor(elapsed / 60)).padStart(2, '0') + ':' + String(elapsed % 60).padStart(2, '0');
+
+            for (const [key, s] of Object.entries(state)) {
+                document.getElementById(`${key}-bal`).textContent = s.bal.toFixed(6) + ' SOL';
+                const pct = Math.min(100, (s.bal / Math.max(s.startBal, s.bal)) * 100);
+                document.getElementById(`${key}-bar`).style.width = pct + '%';
+                document.getElementById(`${key}-pct`).textContent = Math.round(pct) + '%';
+                document.getElementById(`${key}-txs`).textContent = s.txs;
+
+                const el = document.getElementById(`${key}-regime`);
+                el.textContent = s.regime;
+                el.className = 'regime ' + s.regime;
+
+                const rateEl = document.getElementById(`${key}-rate`);
+                if (s.txs > 0) {
+                    const r = (s.successes / s.txs * 100);
+                    rateEl.textContent = r.toFixed(0) + '%';
+                    rateEl.className = 'rate ' + (r >= 70 ? 'high' : r >= 40 ? 'mid' : 'low');
+                }
+            }
+
+            document.getElementById('agg-txs').textContent = totalTxs;
+            document.getElementById('agg-rate').textContent = totalTxs > 0 ? (totalSuccess / totalTxs * 100).toFixed(1) + '%' : '—%';
+            document.getElementById('agg-sol').textContent = totalSol.toFixed(6);
+        }
+
+        function addTxRow(tx) {
+            const feed = document.getElementById('tx-feed');
+            // Remove "waiting" msg
+            if (feed.children.length === 1 && feed.children[0].textContent.includes('Waiting')) {
+                feed.innerHTML = '';
+            }
+
+            const row = document.createElement('div');
+            row.className = 'tx-row';
+
+            if (tx.action === 'memo') {
+                row.innerHTML = `<span class="tx-icon ok">◈</span>
+      <span class="tx-route">${tx.agent} → Memo</span>
+      <span class="tx-amount" style="color:#58a6ff">PROGRAM_CALL</span>
+      <span class="tx-sig">on-chain log</span>`;
+            } else if (tx.success) {
+                row.innerHTML = `<span class="tx-icon ok">✓</span>
+      <span class="tx-route">${tx.agent} → ${tx.to}</span>
+      <span class="tx-amount">${tx.amt.toFixed(6)} SOL</span>
+      <span class="tx-sig">${tx.sig}..</span>`;
+            } else {
+                row.innerHTML = `<span class="tx-icon fail">✗</span>
+      <span class="tx-route">${tx.agent} → ${tx.to || '?'}</span>
+      <span class="tx-err">${tx.err}</span>`;
+            }
+
+            feed.insertBefore(row, feed.firstChild);
+
+            // Keep max 7 rows
+            while (feed.children.length > 7) feed.removeChild(feed.lastChild);
+        }
+
+        function processEvent(ev) {
+            const s = state[ev.agent.toLowerCase()];
+            if (!s) return;
+
+            s.regime = ev.regime || s.regime;
+
+            if (ev.action === 'send') {
+                s.txs++;
+                totalTxs++;
+
+                if (ev.success) {
+                    s.successes++;
+                    totalSuccess++;
+                    s.bal -= ev.amt + 0.000005; // tx fee
+                    totalSol += ev.amt;
+
+                    const target = state[ev.to.toLowerCase()];
+                    if (target) target.bal += ev.amt;
+                } else {
+                    s.txs; // still count
+                }
+
+                addTxRow(ev);
+            } else if (ev.action === 'memo') {
+                totalTxs++;
+                totalSuccess++;
+                s.txs++;
+                s.successes++;
+                addTxRow(ev);
+            }
+            // 'hold' just updates regime
+
+            updateUI();
+        }
+
+        // Main loop — 1 tick per second, events fire at their scheduled time
+        const timer = setInterval(() => {
+            elapsed++;
+
+            while (scenarioIdx < SCENARIO.length && SCENARIO[scenarioIdx].t <= elapsed) {
+                processEvent(SCENARIO[scenarioIdx]);
+                scenarioIdx++;
+            }
+
+            updateUI();
+
+            if (elapsed >= 32) {
+                clearInterval(timer);
+            }
+        }, 1000);
+
+        updateUI();
+    </script>
+</body>
+
+</html>

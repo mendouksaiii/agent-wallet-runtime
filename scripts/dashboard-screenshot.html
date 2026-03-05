@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Agent Wallet Runtime — Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1b26;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px;
+            min-height: 100vh;
+            font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+        }
+
+        .terminal {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            width: 720px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .titlebar {
+            background: #161b22;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red {
+            background: #ff5f57;
+        }
+
+        .dot.yellow {
+            background: #febc2e;
+        }
+
+        .dot.green {
+            background: #28c840;
+        }
+
+        .titlebar-text {
+            color: #8b949e;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .content {
+            padding: 16px 20px;
+            color: #c9d1d9;
+            font-size: 13.5px;
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        .cyan {
+            color: #56d4dd;
+        }
+
+        .green {
+            color: #3fb950;
+        }
+
+        .red {
+            color: #f85149;
+        }
+
+        .yellow {
+            color: #d29922;
+        }
+
+        .magenta {
+            color: #bc8cff;
+        }
+
+        .dim {
+            color: #6e7681;
+        }
+
+        .bold {
+            font-weight: 700;
+        }
+
+        .white {
+            color: #f0f6fc;
+        }
+
+        .bar-filled {
+            color: #3fb950;
+        }
+
+        .bar-empty {
+            color: #484f58;
+        }
+
+        /* Regime tags */
+        .tag-hot {
+            color: #56d4dd;
+            background: rgba(86, 212, 221, 0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        .tag-stable {
+            color: #bc8cff;
+            background: rgba(188, 140, 255, 0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        .tag-active {
+            color: #d29922;
+            background: rgba(210, 153, 34, 0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="terminal">
+        <div class="titlebar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="titlebar-text">agent-wallet run --password ••••• --duration 60</span>
+        </div>
+        <div class="content"><span class="cyan">┌──</span><span class="bold white"> Agent Wallet Runtime</span> <span
+                class="cyan">─────────────────────</span> <span class="dim">devnet ── 00:31 elapsed</span> <span
+                class="cyan">┐</span>
+            <span class="cyan">│</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="cyan">┌─</span><span class="bold cyan"> ALPHA</span> <span
+                class="cyan">──────────────</span><span class="magenta">┌─</span><span class="bold magenta"> BETA</span>
+            <span class="magenta">───────────────</span><span class="yellow">┌─</span><span class="bold yellow">
+                GAMMA</span> <span class="yellow">─────────────</span><span class="cyan">┐│</span>
+            <span class="cyan">│</span> <span class="bold white"> 0.952877 SOL</span> <span class="bold white"> 0.962063
+                SOL</span> <span class="bold white"> 0.084995 SOL</span> <span class="cyan">││</span>
+            <span class="cyan">│</span> <span class="bar-filled">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</span><span class="bar-empty">░</span>
+            <span class="dim">97%</span> <span class="bar-filled">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</span> <span class="dim">100%</span>
+            <span class="bar-filled">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</span><span class="bar-empty">░</span> <span
+                class="dim">94%</span> <span class="cyan">││</span>
+            <span class="cyan">│</span> <span class="tag-hot">[hot]</span> <span class="tag-stable">[stable]</span>
+            <span class="tag-active">[active]</span> <span class="cyan">││</span>
+            <span class="cyan">│</span> 9 txs · <span class="green">100%</span> 6 txs · <span class="yellow">50%</span>
+            2 txs · <span class="yellow">50%</span> <span class="cyan">││</span>
+            <span class="cyan">│</span> <span class="cyan">└────────────────────</span><span
+                class="magenta">└────────────────────</span><span class="yellow">└────────────────────</span><span
+                class="cyan">┘│</span>
+            <span class="cyan">│</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="dim">───</span> <span class="dim">Aggregate</span> <span
+                class="dim">──────────────────────────────────────────────────────</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> Txs: <span class="bold white">17</span> Success: <span
+                class="bold green">76.5%</span> SOL moved: <span class="bold white">0.142078</span> <span
+                class="cyan">│</span>
+            <span class="cyan">│</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="dim">───</span> <span class="dim">Recent Transactions</span> <span
+                class="dim">────────────────────────────────────────────</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="red">✗</span> GAMMA → BETA <span class="red">SimulationFailed:
+                AlreadyProcessed</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="green">✓</span> ALPHA → BETA 0.009625 SOL <span
+                class="dim">p3mJVm7a..</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="green">✓</span> ALPHA → BETA 0.009722 SOL <span
+                class="dim">2vi4xZ9h..</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="green">✓</span> GAMMA → BETA 0.005000 SOL <span
+                class="dim">4peR8uYE..</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="green">✓</span> ALPHA → BETA 0.009821 SOL <span
+                class="dim">2ktAf2xs..</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="green">✓</span> BETA → GAMMA 0.030000 SOL <span
+                class="dim">5fSHKpzF..</span> <span class="cyan">│</span>
+            <span class="cyan">│</span> <span class="cyan">│</span>
+            <span class="cyan">└──────────────────────────────────────────────────────────────────────────┘</span>
+        </div>
+    </div>
+
+</body>
+
+</html>
