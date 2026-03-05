@@ -20,7 +20,7 @@ Security: Private key never leaves runtime memory. No serialization.
 
 Description: Validates, simulates, signs, and broadcasts a transaction from a structured intent.
 Inputs:
-  - intent: TransactionIntent { type, toAddress?, amountSol?, mintAddress?, amountTokens?, decimals?, programId?, instructionData?, memo? }
+  - intent: TransactionIntent { type, toAddress?, amountSol?, mintAddress?, amountTokens?, decimals?, programId?, instructionData?, memo?, inputMint?, outputMint?, slippageBps? }
   - agentId: number
 Outputs:
   - ExecutionResult { success, signature?, slot?, fee?, error?, simulationLogs?, policyViolation?, explorerUrl?, retriesUsed? }
@@ -28,6 +28,7 @@ Supported Intent Types:
   - TRANSFER_SOL: Native SOL transfers via System Program
   - TRANSFER_SPL: SPL token transfers with automatic ATA derivation and idempotent account creation
   - PROGRAM_CALL: Arbitrary on-chain program calls (e.g., Memo Program at MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr)
+  - SWAP_TOKEN: Token swaps via Jupiter DEX aggregator (v6 API). Supports VersionedTransaction (v0 + ALTs).
 Guarantees:
   - Policy check runs before signing (cannot be bypassed)
   - Simulation runs before signing (cannot be bypassed)
@@ -90,8 +91,9 @@ Agent 0: ALPHA — Momentum Market Maker (derivation: m/44'/501'/0'/0')
   Strategy: Adjusts send probability (25-95%) and amounts based on success rate from DB.
   Hot regime (≥70% success): aggressive. Cold regime (≤30%): conservative.
 
-Agent 1: BETA  — Smart Accumulator (derivation: m/44'/501'/1'/0')
-  Strategy: Tracks balance baseline. Forwards 20% of excess on rising trend. Holds otherwise.
+Agent 1: BETA  — Smart Accumulator + Jupiter Trader (derivation: m/44'/501'/1'/0')
+  Strategy: Tracks balance baseline. Forwards 20% of excess on rising trend.
+  Every 5th active cycle: swaps 0.01 SOL → USDC via Jupiter DEX (SWAP_TOKEN intent).
 
 Agent 2: GAMMA — Need-Score Rebalancer (derivation: m/44'/501'/2'/0')
   Strategy: Calculates need scores for all agents. Funds neediest proportionally.
@@ -111,4 +113,26 @@ Agent 2: GAMMA — Need-Score Rebalancer (derivation: m/44'/501'/2'/0')
 - System Program: Native SOL transfers (TRANSFER_SOL)
 - SPL Token Program: Token transfers with ATA management (TRANSFER_SPL)
 - Memo Program: On-chain structured logging (PROGRAM_CALL)
+- Jupiter v6 API: DEX aggregated swaps across Raydium, Orca, Meteora, Phoenix (SWAP_TOKEN)
 - Custom programs: Supported via PROGRAM_CALL with custom instructionData
+
+## CAPABILITY: wallet.swapToken
+
+Description: Swaps tokens via Jupiter DEX aggregator. Agent specifies inputMint, outputMint, and amount — the runtime fetches the best route, builds a VersionedTransaction, simulates, signs, and broadcasts.
+Inputs:
+  - inputMint: string (token mint address, defaults to wrapped SOL)
+  - outputMint: string (target token mint address, e.g. USDC)
+  - amountLamports: number (amount in smallest units)
+  - slippageBps: number (max slippage in basis points, e.g. 50 = 0.5%)
+Outputs:
+  - ExecutionResult (same as wallet.executeIntent)
+API Calls:
+  - GET https://quote-api.jup.ag/v6/quote (route discovery)
+  - POST https://quote-api.jup.ag/v6/swap (transaction assembly)
+Security:
+  - Only userPublicKey is sent to Jupiter API — private key never leaves runtime
+  - Full simulation runs on the assembled VersionedTransaction before signing
+  - Policy engine validates the SOL value against per-tx and daily limits
+Limitations:
+  - Devnet has sparse liquidity — swaps may fail with "no route" on devnet
+  - Mainnet-ready: identical code path, just needs funded mainnet wallet + RPC endpoint
