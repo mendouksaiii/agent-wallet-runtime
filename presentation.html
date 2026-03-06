@@ -573,9 +573,9 @@
             any human touching a private key at signing time.
         </p>
         <div class="title-meta">
-            <span>Stack <span class="val">TypeScript + Solana web3.js</span></span>
+            <span>Stack <span class="val">TypeScript + Solana web3.js + Jupiter v6</span></span>
             <span>Network <span class="val">Devnet</span></span>
-            <span>Tests <span class="val">24/24 passing</span></span>
+            <span>Tests <span class="val">29/29 passing</span></span>
         </div>
     </section>
 
@@ -623,7 +623,8 @@
                 <span class="card-icon">🛡️</span>
                 <h3>Policy Engine</h3>
                 <p>Per-tx limits, rolling 24h caps, program whitelists. All enforced before signing — an agent
-                    <strong>cannot</strong> bypass them.</p>
+                    <strong>cannot</strong> bypass them.
+                </p>
             </div>
             <div class="card">
                 <span class="card-icon">🔗</span>
@@ -658,7 +659,7 @@
         <h2>Build <span class="highlight-green">proof</span>, not promises.</h2>
         <div class="grid-3 fade-up">
             <div class="card big-stat">
-                <div class="number highlight-green">24</div>
+                <div class="number highlight-green">29</div>
                 <div class="desc">Tests Passing</div>
             </div>
             <div class="card big-stat">
@@ -711,9 +712,10 @@
         </div>
 
         <div class="verdict-box bad fade-up">
-            <h4>❌ SPL tokens aren't supported</h4>
-            <p>Only SOL transfers work. The TRANSFER_SPL intent type literally throws "not implemented." A real wallet
-                runtime that can't do token transfers is a toy.</p>
+            <h4>❌ SPL token transfers aren't supported</h4>
+            <p>Direct SPL token transfers aren't implemented (TRANSFER_SPL throws "not implemented"). However, we
+                <strong>DID</strong> just integrate the Jupiter v6 API to swap SOL for USDC (SPL token output).
+            </p>
         </div>
 
         <div class="verdict-box warn fade-up">
@@ -771,11 +773,11 @@
                 <span class="value highlight-amber">60%</span>
             </div>
             <div class="status-row fade-up">
-                <span class="label">Token (SPL) Support</span>
+                <span class="label">Jupiter DEX Integrations</span>
                 <div class="status-bar-track">
-                    <div class="status-bar-fill red" style="width: 0%"></div>
+                    <div class="status-bar-fill green" style="width: 100%"></div>
                 </div>
-                <span class="value highlight-red">0%</span>
+                <span class="value highlight-green">100%</span>
             </div>
             <div class="status-row fade-up">
                 <span class="label">Production Security</span>
