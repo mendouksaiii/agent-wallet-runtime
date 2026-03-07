@@ -137,57 +137,63 @@
 
     <script>
         const script = [
+            // ── HOOK ──
             {
                 view: 'dash',
-                text: "Hey everyone, this is Agent Wallet Runtime — an autonomous AI wallet infrastructure built for Solana."
+                text: "What if your AI agents could manage real money — autonomously — without you ever handing them a private key?"
             },
             {
                 view: 'dash',
-                text: "What you're looking at right now is our live devnet dashboard. We have three autonomous agents—Alpha, Beta, and Gamma—actively making financial decisions and executing transactions on-chain."
+                text: "That's Agent Wallet Runtime. What you're seeing right now is three autonomous agents — Alpha, Beta, and Gamma — executing real blockchain transactions on Solana devnet, in real time, right now."
             },
+            // ── THE PROBLEM ──
             {
                 view: 'dash',
-                text: "The core problem we're solving is security. Right now, most AI agents hold a plaintext private key in a Python script. If the script gets hacked, the wallet is drained. We built a system where agents never touch the private key."
+                text: "Here's the problem every AI-crypto builder hits: you give your agent a private key. It's sitting in a .env file. One leak, one prompt injection, one compromised dependency — your wallet is gone. That's not infrastructure. That's a loaded gun left on the table."
             },
+            // ── OUR SOLUTION ──
             {
                 view: 'deck',
                 action: () => document.getElementById('deck').src = "presentation.html#slide-idea",
-                text: "Instead of signing transactions directly, our agents emit intents — structured requests like 'transfer 0.1 SOL' or 'swap SOL for USDC on Jupiter'."
+                text: "We solved this with a trust boundary. Agents never hold keys. Instead, they emit structured intents: things like 'transfer 0.008 SOL to this address' or 'swap my SOL for USDC on Jupiter.' Just a declaration of intent."
             },
             {
                 view: 'deck',
-                text: "These intents are intercepted by our Wallet Runtime. Before any signature happens, the runtime enforces strict security policies, like per-transaction limits and daily spend caps. Then it fully simulates the transaction."
+                text: "The Wallet Runtime intercepts every intent before anything gets signed. It runs a policy check — is this within the agent's daily spend limit? Is this program whitelisted? Then it runs a full on-chain simulation. The transaction is executed in a dry run against Solana's RPC before a single byte is signed. Only then does it sign and broadcast."
             },
             {
                 view: 'deck',
-                text: "Only if the policy passes AND the simulation succeeds does the runtime finally sign and broadcast to the blockchain."
+                text: "An agent literally cannot spend more than its policy allows. It's not a guideline. It's enforced in the layer between agent logic and the blockchain. No bypass. No override."
+            },
+            // ── LIVE PROOF ──
+            {
+                view: 'dash',
+                text: "Look at the transaction feed. You can see green checkmarks — those are confirmed on-chain transactions. And you can see red rejections — those are the policy engine doing its job in real time, blocking ALPHA from exceeding its daily spending limit."
             },
             {
                 view: 'dash',
-                text: "Back on the dashboard, you can see our agents operating in different regimes based on their historical success rates."
+                text: "Alpha is in 'cold' regime right now — it hit its daily cap. BETA is in 'stable' mode, accumulating. Gamma is 'active', rebalancing across agents. These aren't hardcoded states. Each agent reads its own historical performance from a SQLite audit trail and adapts its strategy every cycle."
             },
+            // ── JUPITER DEX ──
             {
                 view: 'dash',
-                text: "Alpha is a Momentum Market Maker. Beta is a Smart Accumulator that integrates directly with the Jupiter v6 API to swap excess SOL for USDC. Gamma acts as a Rebalancer."
+                text: "We also integrated the Jupiter v6 DEX aggregator. Beta swaps 0.01 SOL for USDC every 5th cycle. Jupiter finds the best route across Raydium, Orca, and Meteora. The swap comes back as a Versioned Transaction — we handle that correctly alongside legacy transactions, full simulation gate included."
             },
-            {
-                view: 'deck',
-                action: () => document.getElementById('deck').src = "presentation.html#slide-works",
-                text: "We wanted to build proof, not promises. The system features a strict TypeScript codebase with zero build errors."
-            },
+            // ── TECHNICAL CREDIBILITY ──
             {
                 view: 'deck',
                 action: () => document.getElementById('deck').src = "presentation.html#slide-numbers",
-                text: "We have 29 out of 29 unit tests passing, deterministic HD wallet derivation using BIP44, and an AES-256-GCM encrypted keystore."
+                text: "Here are the hard numbers. 29 tests passing. Zero build errors. AES-256-GCM encrypted keystore with PBKDF2 key derivation. BIP44 HD wallet derivation — one master mnemonic, infinite deterministic agent wallets. Strict TypeScript throughout. Every transaction logged to SQLite with full intent, result, balance delta, and simulation logs."
+            },
+            // ── STRONG CLOSE ──
+            {
+                view: 'dash',
+                text: "The architecture is ready to plug in a real reasoning model. Swap out the if-else agent logic for an LLM call, and you have an AI agent that can genuinely reason about its financial decisions — with a system underneath it that you can actually trust with real capital."
             },
             {
                 view: 'deck',
                 action: () => document.getElementById('deck').src = "presentation.html#slide-title",
-                text: "The entire codebase is open source and strictly typed. You can pull it down and run the simulation CLI yourself in under 2 minutes."
-            },
-            {
-                view: 'deck',
-                text: "Thanks for checking out Agent Wallet Runtime — making autonomous AI agents secure enough for real capital."
+                text: "Agent Wallet Runtime. The secure execution layer that autonomous AI agents on Solana deserve. Thank you."
             }
         ];
 
