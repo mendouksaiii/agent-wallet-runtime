@@ -11,9 +11,9 @@
 ```mermaid
 flowchart TD
     subgraph Agents["🤖 Autonomous Agents"]
-        A["ALPHA\nMomentum Maker"]
-        B["BETA\nSmart Accumulator"]
-        G["GAMMA\nNeed Rebalancer"]
+        A["ORION\nMomentum Maker"]
+        B["LYRA\nSmart Accumulator"]
+        G["VEGA\nNeed Rebalancer"]
     end
 
     A -->|"TransactionIntent"| S
@@ -90,7 +90,7 @@ The simulation renders a real-time ANSI terminal dashboard (zero dependencies):
 ```
 ┌── Agent Wallet Runtime ───────────── devnet ── 00:31 elapsed ┐
 │                                                               │
-│  ┌─ ALPHA ──────────┬─ BETA ───────────┬─ GAMMA ───────────┐│
+│  ┌─ ORION ──────────┬─ LYRA ───────────┬─ VEGA ───────────┐│
 │  │ 0.952877 SOL     │ 0.962063 SOL     │ 0.084995 SOL      ││
 │  │ ▓▓▓▓▓▓▓▓▓░ 97%   │ ▓▓▓▓▓▓▓▓▓▓ 100%  │ ▓▓▓▓▓▓▓▓▓░ 94%   ││
 │  │ [hot]             │ [stable]          │ [active]           ││
@@ -99,8 +99,8 @@ The simulation renders a real-time ANSI terminal dashboard (zero dependencies):
 │  ─── Aggregate ─────────────────────────────────────────────│
 │  Txs: 17    Success: 76.5%    SOL moved: 0.142078            │
 │  ─── Recent Transactions ───────────────────────────────────│
-│  ✓ ALPHA → BETA  0.009625 SOL  p3mJVm7a..                   │
-│  ✓ BETA  → GAMMA 0.030000 SOL  5fSHKpzF..                   │
+│  ✓ ORION → LYRA  0.009625 SOL  p3mJVm7a..                   │
+│  ✓ LYRA  → VEGA 0.030000 SOL  5fSHKpzF..                   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -120,9 +120,9 @@ Agents learn from their transaction history stored in SQLite — no random dice 
 
 | Agent | ID | Strategy | How It Works |
 |-------|-----|----------|-------------|
-| ALPHA | 0 | **Momentum** | Queries last 10 txs. Hot streak (≥70% success) → 85% send probability, bigger amounts. Cold streak → 25% prob, minimum amounts. |
-| BETA | 1 | **Smart Accumulation** | Tracks starting balance as baseline. Forwards 20% of excess on rising trend. Holds during stable/falling periods. |
-| GAMMA | 2 | **Need-Score Rebalancer** | Calculates `needScore = (balanceNeed + failureRate) × activity` for all agents. Funds the neediest proportionally. |
+| ORION | 0 | **Momentum** | Queries last 10 txs. Hot streak (≥70% success) → 85% send probability, bigger amounts. Cold streak → 25% prob, minimum amounts. |
+| LYRA | 1 | **Smart Accumulation** | Tracks starting balance as baseline. Forwards 20% of excess on rising trend. Holds during stable/falling periods. |
+| VEGA | 2 | **Need-Score Rebalancer** | Calculates `needScore = (balanceNeed + failureRate) × activity` for all agents. Funds the neediest proportionally. |
 
 ## CLI Reference
 
@@ -139,7 +139,7 @@ Agents learn from their transaction history stored in SQLite — no random dice 
 Create and trade SPL tokens on devnet:
 
 ```bash
-# Create a test token, mint 1M to ALPHA, set up ATAs for all agents
+# Create a test token, mint 1M to ORION, set up ATAs for all agents
 node scripts/create-demo-token.js <password>
 ```
 

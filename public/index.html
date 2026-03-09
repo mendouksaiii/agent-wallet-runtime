@@ -4,33 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Wallet Runtime</title>
-    <meta name="description" content="Autonomous AI wallet infrastructure on Solana — live simulation dashboard">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <title>Agent Wallet Runtime - Retro</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👾</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #111827;
-            --bg-card: #1a2035;
-            --bg-card-hover: #1e2642;
-            --border: #2a3352;
-            --border-glow: rgba(99, 179, 237, 0.15);
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-dim: #64748b;
-            --cyan: #22d3ee;
-            --cyan-glow: rgba(34, 211, 238, 0.15);
-            --purple: #a78bfa;
-            --purple-glow: rgba(167, 139, 250, 0.15);
-            --amber: #fbbf24;
-            --amber-glow: rgba(251, 191, 36, 0.15);
-            --green: #34d399;
-            --green-dim: rgba(52, 211, 153, 0.12);
-            --red: #f87171;
-            --red-dim: rgba(248, 113, 113, 0.12);
-            --blue: #60a5fa;
+            --bg-base: #000000;
+            --bg-panel: #111111;
+            --bg-accent: #1a1a1a;
+
+            --border-light: #555555;
+            --border-dark: #222222;
+
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+
+            --cyan: #00f0ff;
+            --purple: #ff00ff;
+            --amber: #ffaa00;
+            --green: #00ff00;
+            --red: #ff0033;
+            --blue: #0033ff;
+
+            --shadow-dist: 6px;
         }
 
         * {
@@ -40,704 +37,802 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'VT323', monospace;
+            background-color: var(--bg-base);
+            color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
+            background-image: radial-gradient(var(--border-dark) 2px, transparent 2px);
+            background-size: 20px 20px;
         }
 
-        /* Animated gradient background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(34, 211, 238, 0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(251, 191, 36, 0.03) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
+        .heading-font {
+            font-family: 'Press Start 2P', cursive;
         }
 
-        .container {
-            max-width: 1100px;
+        .app {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 24px 20px;
-            position: relative;
-            z-index: 1;
+            padding: 30px 20px;
         }
 
-        /* ─── Header ─── */
+        .block-3d {
+            background: var(--bg-panel);
+            border: 4px solid var(--text-main);
+            box-shadow: var(--shadow-dist) var(--shadow-dist) 0px 0px var(--border-light);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .block-3d:hover {
+            transform: translate(calc(var(--shadow-dist) * -0.5), calc(var(--shadow-dist) * -0.5));
+            box-shadow: calc(var(--shadow-dist) * 1.5) calc(var(--shadow-dist) * 1.5) 0px 0px var(--border-light);
+        }
+
+        .block-inset {
+            background: var(--bg-base);
+            border: 4px solid var(--border-light);
+            box-shadow: inset 4px 4px 0px 0px rgba(0, 0, 0, 0.8);
+        }
+
         .header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding: 20px;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 20px;
         }
 
-        .logo {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--cyan), var(--purple));
+        .logo-box {
+            width: 64px;
+            height: 64px;
+            background: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            font-weight: 800;
-            color: white;
-            box-shadow: 0 4px 20px rgba(34, 211, 238, 0.2);
+            font-size: 24px;
+            color: var(--bg-base);
+            box-shadow: 4px 4px 0px var(--purple), 8px 8px 0px var(--cyan);
         }
 
-        .header-title {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+        .title {
+            font-size: 20px;
+            line-height: 1.5;
+            color: var(--text-main);
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px var(--border-dark);
         }
 
-        .header-sub {
-            font-size: 13px;
+        .subtitle {
+            font-size: 22px;
             color: var(--text-dim);
-            margin-top: 2px;
+            margin-top: 5px;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .network-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-secondary);
-        }
-
-        .network-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 8px var(--green);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.4;
-            }
-        }
-
-        .elapsed {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--cyan);
-            min-width: 60px;
+        .header-sys {
             text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
         }
 
-        /* ─── Controls ─── */
         .controls {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 10px;
             align-items: center;
             flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
-        .controls input,
-        .controls select {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
+        input[type="password"],
+        input[type="number"] {
+            background: var(--bg-base);
+            color: var(--text-main);
+            border: 3px solid var(--border-light);
+            padding: 8px;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
             outline: none;
-            transition: border 0.2s;
         }
 
-        .controls input:focus,
-        .controls select:focus {
+        input:focus {
             border-color: var(--cyan);
         }
 
-        .controls input::placeholder {
-            color: var(--text-dim);
+        button {
+            background: var(--text-main);
+            color: var(--bg-base);
+            border: 3px solid var(--text-main);
+            padding: 8px 16px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--border-light);
+            transition: all 0.1s;
+        }
+
+        button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--border-light);
+        }
+
+        button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--border-light);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
         }
 
         .btn-start {
-            background: linear-gradient(135deg, var(--cyan), #0ea5e9);
-            color: #0a0e17;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-            box-shadow: 0 4px 16px rgba(34, 211, 238, 0.25);
-        }
-
-        .btn-start:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(34, 211, 238, 0.35);
-        }
-
-        .btn-start:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+            background: var(--cyan);
+            border-color: var(--cyan);
+            box-shadow: 4px 4px 0px var(--blue);
         }
 
         .btn-stop {
-            background: rgba(248, 113, 113, 0.12);
-            color: var(--red);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
+            background: var(--red);
+            border-color: var(--red);
+            box-shadow: 4px 4px 0px #880000;
             display: none;
         }
 
-        .status-text {
-            color: var(--text-dim);
-            font-size: 13px;
-            margin-left: auto;
+        .timer {
+            font-size: 36px;
+            color: var(--cyan);
+            text-shadow: 3px 3px 0px var(--blue);
+            margin-top: 5px;
         }
 
-        /* ─── Agent Cards ─── */
+        .status-text {
+            color: var(--amber);
+            font-size: 18px;
+        }
+
+        .intents {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .intent {
+            padding: 8px 16px;
+            font-size: 18px;
+            text-transform: uppercase;
+            border: 3px solid var(--border-light);
+            background: var(--bg-base);
+            color: var(--text-dim);
+            transition: all 0.2s;
+        }
+
+        .intent.active {
+            border-color: var(--cyan);
+            color: var(--bg-base);
+            background: var(--cyan);
+            box-shadow: 4px 4px 0px var(--blue);
+        }
+
         .agents {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-bottom: 20px;
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
         .agent-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px 20px;
-            transition: all 0.3s ease;
+            padding: 20px;
             position: relative;
-            overflow: hidden;
         }
 
-        .agent-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            border-radius: 14px 14px 0 0;
+        .agent-card.orion {
+            border-color: var(--cyan);
+            box-shadow: var(--shadow-dist) var(--shadow-dist) 0px 0px var(--blue);
         }
 
-        .agent-card.alpha::before {
-            background: linear-gradient(90deg, var(--cyan), #0ea5e9);
+        .agent-card.lyra {
+            border-color: var(--purple);
+            box-shadow: var(--shadow-dist) var(--shadow-dist) 0px 0px #880088;
         }
 
-        .agent-card.beta::before {
-            background: linear-gradient(90deg, var(--purple), #8b5cf6);
+        .agent-card.vega {
+            border-color: var(--amber);
+            box-shadow: var(--shadow-dist) var(--shadow-dist) 0px 0px #aa5500;
         }
 
-        .agent-card.gamma::before {
-            background: linear-gradient(90deg, var(--amber), #f59e0b);
+        .agent-card.orion:hover {
+            box-shadow: calc(var(--shadow-dist)*1.5) calc(var(--shadow-dist)*1.5) 0px 0px var(--blue);
         }
 
-        .agent-card:hover {
-            border-color: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+        .agent-card.lyra:hover {
+            box-shadow: calc(var(--shadow-dist)*1.5) calc(var(--shadow-dist)*1.5) 0px 0px #880088;
         }
 
-        .agent-header {
+        .agent-card.vega:hover {
+            box-shadow: calc(var(--shadow-dist)*1.5) calc(var(--shadow-dist)*1.5) 0px 0px #aa5500;
+        }
+
+        .agent-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 3px dashed var(--border-light);
+            padding-bottom: 15px;
+        }
+
+        .agent-id {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
+            gap: 12px;
         }
 
-        .agent-name {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+        .a-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #000;
+            border: 3px solid #000;
         }
 
-        .alpha .agent-name {
+        .orion .a-icon {
+            background: var(--cyan);
+        }
+
+        .lyra .a-icon {
+            background: var(--purple);
+        }
+
+        .vega .a-icon {
+            background: var(--amber);
+        }
+
+        .a-name {
+            font-size: 16px;
+        }
+
+        .orion .a-name {
             color: var(--cyan);
         }
 
-        .beta .agent-name {
+        .lyra .a-name {
             color: var(--purple);
         }
 
-        .gamma .agent-name {
+        .vega .a-name {
             color: var(--amber);
         }
 
-        .regime-tag {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 20px;
+        .tag {
+            padding: 4px 8px;
+            font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            border: 2px solid;
+            background: #000;
         }
 
         .regime-hot {
             color: var(--cyan);
-            background: var(--cyan-glow);
+            border-color: var(--cyan);
         }
 
         .regime-cold {
             color: var(--red);
-            background: var(--red-dim);
-        }
-
-        .regime-normal {
-            color: var(--text-secondary);
-            background: rgba(148, 163, 184, 0.1);
+            border-color: var(--red);
         }
 
         .regime-stable {
             color: var(--purple);
-            background: var(--purple-glow);
-        }
-
-        .regime-rising {
-            color: var(--green);
-            background: var(--green-dim);
+            border-color: var(--purple);
         }
 
         .regime-active {
             color: var(--amber);
-            background: var(--amber-glow);
+            border-color: var(--amber);
         }
 
-        .regime-observing {
+        .regime-wait {
             color: var(--text-dim);
-            background: rgba(100, 116, 139, 0.1);
+            border-color: var(--border-light);
         }
 
-        .balance-row {
-            margin-bottom: 10px;
+        .bal-wrapper {
+            margin-bottom: 20px;
         }
 
-        .balance-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .bal {
+            font-size: 48px;
+            display: block;
+            line-height: 1;
+            margin-bottom: 5px;
         }
 
-        .balance-label {
-            font-size: 11px;
+        .bal-label {
+            font-size: 18px;
             color: var(--text-dim);
+            text-transform: uppercase;
         }
 
-        .bar-outer {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 3px;
-            margin-bottom: 12px;
-            overflow: hidden;
+        .progress-box {
+            height: 16px;
+            padding: 2px;
+            margin-bottom: 20px;
         }
 
-        .bar-inner {
+        .progress-fill {
             height: 100%;
-            border-radius: 3px;
-            transition: width 1s ease;
+            transition: width 0.5s steps(10);
         }
 
-        .alpha .bar-inner {
-            background: linear-gradient(90deg, var(--cyan), #0ea5e9);
+        .orion .progress-fill {
+            background: var(--cyan);
         }
 
-        .beta .bar-inner {
-            background: linear-gradient(90deg, var(--purple), #8b5cf6);
+        .lyra .progress-fill {
+            background: var(--purple);
         }
 
-        .gamma .bar-inner {
-            background: linear-gradient(90deg, var(--amber), #f59e0b);
+        .vega .progress-fill {
+            background: var(--amber);
         }
 
-        .agent-stats {
+        .stats-row {
             display: flex;
-            gap: 16px;
+            justify-content: space-between;
         }
 
-        .stat {
+        .stat-col {
             display: flex;
             flex-direction: column;
         }
 
-        .stat-val {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 15px;
-            font-weight: 600;
+        .s-val {
+            font-size: 28px;
         }
 
-        .stat-label {
-            font-size: 10px;
+        .s-lbl {
+            font-size: 16px;
             color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 1px;
         }
 
-        /* ─── Aggregate + Feed ─── */
-        .bottom-grid {
+        .bottom-layout {
             display: grid;
-            grid-template-columns: 1fr 1.4fr;
-            gap: 14px;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
-        .section-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px 20px;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
+        .panel-title {
+            font-size: 16px;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
             color: var(--text-dim);
-            margin-bottom: 16px;
         }
 
-        .agg-grid {
+        .metrics-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 15px;
         }
 
-        .agg-item {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
+        .metric {
+            padding: 15px;
+            text-align: center;
         }
 
-        .agg-val {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 22px;
-            font-weight: 700;
+        .m-val {
+            font-size: 36px;
+            margin-bottom: 5px;
         }
 
-        .agg-label {
-            font-size: 11px;
+        .m-lbl {
+            font-size: 16px;
             color: var(--text-dim);
-            margin-top: 2px;
+            text-transform: uppercase;
         }
 
-        .agg-val.green {
+        .val-green {
             color: var(--green);
+            text-shadow: 2px 2px 0px #005500;
         }
 
-        .tx-list {
+        .terminal {
+            height: 280px;
+            overflow-y: auto;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            max-height: 260px;
-            overflow-y: auto;
+            gap: 5px;
         }
 
-        .tx-list::-webkit-scrollbar {
-            width: 4px;
+        .terminal::-webkit-scrollbar {
+            width: 12px;
         }
 
-        .tx-list::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 2px;
+        .terminal::-webkit-scrollbar-track {
+            background: var(--bg-base);
+            border-left: 3px solid var(--border-light);
         }
 
-        .tx-row {
+        .terminal::-webkit-scrollbar-thumb {
+            background: var(--text-dim);
+            border: 2px solid var(--bg-base);
+        }
+
+        .tx-line {
+            padding: 8px 10px;
+            font-size: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            background: rgba(255, 255, 255, 0.015);
-            animation: slideIn 0.3s ease forwards;
-            font-family: 'JetBrains Mono', monospace;
+            gap: 12px;
+            border-bottom: 2px dashed var(--border-dark);
+            animation: slideIn 0.2s steps(4) forwards;
         }
 
         @keyframes slideIn {
             from {
-                opacity: 0;
                 transform: translateX(-10px);
+                opacity: 0;
             }
 
             to {
-                opacity: 1;
                 transform: translateX(0);
+                opacity: 1;
             }
         }
 
-        .tx-icon {
-            font-size: 14px;
-            flex-shrink: 0;
+        .tx-line:hover {
+            background: var(--bg-accent);
         }
 
-        .tx-icon.ok {
+        .tx-ok {
             color: var(--green);
-        }
-
-        .tx-icon.fail {
-            color: var(--red);
-        }
-
-        .tx-icon.memo {
-            color: var(--blue);
-        }
-
-        .tx-route {
-            color: var(--text-secondary);
-            min-width: 110px;
-        }
-
-        .tx-amount {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .tx-sig {
-            color: var(--text-dim);
-            font-size: 11px;
-            margin-left: auto;
         }
 
         .tx-err {
             color: var(--red);
-            font-size: 11px;
         }
 
-        .empty-state {
+        .tx-swap {
+            color: var(--purple);
+        }
+
+        .tx-memo {
+            color: var(--cyan);
+        }
+
+        .tx-route {
+            width: 150px;
+            color: var(--text-main);
+        }
+
+        .tx-amt {
+            font-weight: bold;
+        }
+
+        .tx-msg {
+            color: var(--red);
+            font-size: 16px;
+        }
+
+        .tx-hash {
+            margin-left: auto;
+            color: var(--border-light);
+        }
+
+        .footer {
+            border-top: 4px solid var(--border-light);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer a {
             color: var(--text-dim);
-            font-size: 13px;
-            text-align: center;
-            padding: 40px 0;
+            text-decoration: none;
+            font-size: 20px;
         }
 
-        /* ─── Responsive ─── */
-        @media (max-width: 768px) {
-            .agents {
+        .footer a:hover {
+            color: var(--cyan);
+            background: var(--bg-base);
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            font-size: 16px;
+            background: var(--text-main);
+            color: #000;
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0px var(--border-light);
+            font-weight: bold;
+        }
+
+        @media (max-width: 900px) {
+
+            .agents,
+            .bottom-layout {
                 grid-template-columns: 1fr;
             }
 
-            .bottom-grid {
-                grid-template-columns: 1fr;
+            .header {
+                flex-direction: column;
+                gap: 20px;
             }
 
-            .balance-value {
-                font-size: 20px;
+            .header-sys {
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: flex-start;
             }
         }
     </style>
 </head>
 
 <body>
-
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
+    <div class="app">
+        <header class="header block-3d">
             <div class="header-left">
-                <div class="logo">AW</div>
+                <div class="logo-box heading-font">AW</div>
                 <div>
-                    <div class="header-title">Agent Wallet Runtime</div>
-                    <div class="header-sub">Autonomous AI wallet infrastructure on Solana</div>
+                    <h1 class="title heading-font">Agent Wallet Runtime</h1>
+                    <div class="subtitle">SYS.VER: DEFI-VOXEL-OS // DEVNET</div>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="network-badge">
-                    <span class="network-dot" id="netDot"></span>
-                    <span id="netLabel">devnet</span>
+            <div class="header-sys">
+                <div class="controls">
+                    <input type="password" id="pwInput" placeholder="ENTER KEYSTORE PWD" style="width: 200px">
+                    <input type="number" id="durInput" value="120" min="10" max="600" style="width: 70px"
+                        title="Duration (seconds)">
+                    <button class="btn-start" id="btnStart" onclick="startSim()">START_SIM</button>
+                    <button class="btn-stop" id="btnStop" onclick="stopSim()">HALT</button>
                 </div>
-                <div class="elapsed" id="elapsed">--:--</div>
+                <div class="status-text" id="statusText">AWAITING INPUT...</div>
+                <div class="timer" id="elapsed">00:00</div>
             </div>
-        </div>
+        </header>
 
-        <!-- Controls -->
-        <div class="controls" id="controls">
-            <input type="password" id="pwInput" placeholder="Keystore password" style="width:200px">
-            <input type="number" id="durInput" value="120" min="10" max="600" style="width:90px"
-                title="Duration (seconds)">
-            <button class="btn-start" id="btnStart" onclick="startSim()">▶ Start Simulation</button>
-            <button class="btn-stop" id="btnStop" onclick="stopSim()">■ Stop</button>
-            <span class="status-text" id="statusText"></span>
-        </div>
+        <nav class="intents">
+            <div class="intent" id="tag-sol">[ TRANSFER_SOL ]</div>
+            <div class="intent" id="tag-spl">[ TRANSFER_SPL ]</div>
+            <div class="intent" id="tag-memo">[ PROGRAM_CALL ]</div>
+            <div class="intent" id="tag-swap">[ SWAP_TOKEN ]</div>
+        </nav>
 
-        <!-- Agent Cards -->
-        <div class="agents" id="agentCards">
-            <div class="agent-card alpha" id="card-alpha">
-                <div class="agent-header">
-                    <span class="agent-name">Alpha</span>
-                    <span class="regime-tag regime-normal" id="regime-alpha">—</span>
+        <section class="agents">
+            <div class="agent-card block-3d orion">
+                <div class="agent-head">
+                    <div class="agent-id">
+                        <div class="a-icon heading-font">O</div>
+                        <h2 class="a-name heading-font">ORION</h2>
+                    </div>
+                    <span class="tag regime-wait" id="regime-orion">WAIT</span>
                 </div>
-                <div class="balance-row">
-                    <div class="balance-value" id="bal-alpha">—</div>
-                    <div class="balance-label">SOL Balance</div>
+                <div class="bal-wrapper"><span class="bal" id="bal-orion">-</span><span class="bal-label">Momentum
+                        Market Maker</span></div>
+                <div class="progress-box block-inset">
+                    <div class="progress-fill" id="bar-orion" style="width:0%"></div>
                 </div>
-                <div class="bar-outer">
-                    <div class="bar-inner" id="bar-alpha" style="width:0%"></div>
-                </div>
-                <div class="agent-stats">
-                    <div class="stat"><span class="stat-val" id="txs-alpha">0</span><span
-                            class="stat-label">Transactions</span></div>
-                    <div class="stat"><span class="stat-val" id="rate-alpha">—</span><span class="stat-label">Success
-                            Rate</span></div>
-                </div>
-            </div>
-            <div class="agent-card beta" id="card-beta">
-                <div class="agent-header">
-                    <span class="agent-name">Beta</span>
-                    <span class="regime-tag regime-normal" id="regime-beta">—</span>
-                </div>
-                <div class="balance-row">
-                    <div class="balance-value" id="bal-beta">—</div>
-                    <div class="balance-label">SOL Balance</div>
-                </div>
-                <div class="bar-outer">
-                    <div class="bar-inner" id="bar-beta" style="width:0%"></div>
-                </div>
-                <div class="agent-stats">
-                    <div class="stat"><span class="stat-val" id="txs-beta">0</span><span
-                            class="stat-label">Transactions</span></div>
-                    <div class="stat"><span class="stat-val" id="rate-beta">—</span><span class="stat-label">Success
-                            Rate</span></div>
+                <div class="stats-row">
+                    <div class="stat-col"><span class="s-val" id="txs-orion">0</span><span class="s-lbl">TXS</span>
+                    </div>
+                    <div class="stat-col"><span class="s-val" id="rate-orion">-</span><span class="s-lbl">WIN %</span>
+                    </div>
                 </div>
             </div>
-            <div class="agent-card gamma" id="card-gamma">
-                <div class="agent-header">
-                    <span class="agent-name">Gamma</span>
-                    <span class="regime-tag regime-normal" id="regime-gamma">—</span>
-                </div>
-                <div class="balance-row">
-                    <div class="balance-value" id="bal-gamma">—</div>
-                    <div class="balance-label">SOL Balance</div>
-                </div>
-                <div class="bar-outer">
-                    <div class="bar-inner" id="bar-gamma" style="width:0%"></div>
-                </div>
-                <div class="agent-stats">
-                    <div class="stat"><span class="stat-val" id="txs-gamma">0</span><span
-                            class="stat-label">Transactions</span></div>
-                    <div class="stat"><span class="stat-val" id="rate-gamma">—</span><span class="stat-label">Success
-                            Rate</span></div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Aggregate + Feed -->
-        <div class="bottom-grid">
-            <div class="section-card">
-                <div class="section-title">Aggregate Statistics</div>
-                <div class="agg-grid">
-                    <div class="agg-item">
-                        <div class="agg-val" id="agg-txs">0</div>
-                        <div class="agg-label">Total Transactions</div>
+            <div class="agent-card block-3d lyra">
+                <div class="agent-head">
+                    <div class="agent-id">
+                        <div class="a-icon heading-font">L</div>
+                        <h2 class="a-name heading-font">LYRA</h2>
                     </div>
-                    <div class="agg-item">
-                        <div class="agg-val green" id="agg-rate">—</div>
-                        <div class="agg-label">Success Rate</div>
-                    </div>
-                    <div class="agg-item">
-                        <div class="agg-val" id="agg-sol">0.000000</div>
-                        <div class="agg-label">SOL Moved</div>
-                    </div>
-                    <div class="agg-item">
-                        <div class="agg-val" id="agg-agents">3</div>
-                        <div class="agg-label">Active Agents</div>
+                    <span class="tag regime-wait" id="regime-lyra">WAIT</span>
+                </div>
+                <div class="bal-wrapper"><span class="bal" id="bal-lyra">-</span><span class="bal-label">Accumulator +
+                        Jupiter</span></div>
+                <div class="progress-box block-inset">
+                    <div class="progress-fill" id="bar-lyra" style="width:0%"></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-col"><span class="s-val" id="txs-lyra">0</span><span class="s-lbl">TXS</span></div>
+                    <div class="stat-col"><span class="s-val" id="rate-lyra">-</span><span class="s-lbl">WIN %</span>
                     </div>
                 </div>
             </div>
-            <div class="section-card">
-                <div class="section-title">Recent Transactions</div>
-                <div class="tx-list" id="txFeed">
-                    <div class="empty-state">Start a simulation to see live transactions</div>
+
+            <div class="agent-card block-3d vega">
+                <div class="agent-head">
+                    <div class="agent-id">
+                        <div class="a-icon heading-font">V</div>
+                        <h2 class="a-name heading-font">VEGA</h2>
+                    </div>
+                    <span class="tag regime-wait" id="regime-vega">WAIT</span>
+                </div>
+                <div class="bal-wrapper"><span class="bal" id="bal-vega">-</span><span class="bal-label">Need-Score
+                        Rebalancer</span></div>
+                <div class="progress-box block-inset">
+                    <div class="progress-fill" id="bar-vega" style="width:0%"></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-col"><span class="s-val" id="txs-vega">0</span><span class="s-lbl">TXS</span></div>
+                    <div class="stat-col"><span class="s-val" id="rate-vega">-</span><span class="s-lbl">WIN %</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <section class="bottom-layout">
+            <div class="block-3d" style="padding: 20px;">
+                <h3 class="panel-title heading-font">Global Stats</h3>
+                <div class="metrics-grid">
+                    <div class="metric block-inset">
+                        <div class="m-val" id="agg-txs">0</div>
+                        <div class="m-lbl">TOTAL TXS</div>
+                    </div>
+                    <div class="metric block-inset">
+                        <div class="m-val val-green" id="agg-rate">-</div>
+                        <div class="m-lbl">SUCCESS</div>
+                    </div>
+                    <div class="metric block-inset" style="grid-column: span 2;">
+                        <div class="m-val val-green" id="agg-sol">0.000</div>
+                        <div class="m-lbl">TOTAL SOL MOVED</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-3d" style="padding: 20px;">
+                <h3 class="panel-title heading-font">Devnet Tx Monitor</h3>
+                <div class="terminal block-inset" id="txFeed">
+                    <div style="color: var(--text-dim); padding: 5px;">> SYS_READY. Input credentials to begin remote
+                        execution.</div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <a href="https://github.com/mendouksaiii/agent-wallet-runtime" target="_blank">>
+                github.com/mendouksaiii/agent-wallet-runtime</a>
+            <div class="badges">
+                <div class="badge">TS</div>
+                <div class="badge">SOL</div>
+                <div class="badge">JUPv6</div>
+                <div class="badge">AES256</div>
+            </div>
+        </footer>
     </div>
 
     <script>
         let eventSource = null;
         let isRunning = false;
 
+        function onSimEnd() {
+            if (eventSource) { eventSource.close(); eventSource = null; }
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnStop').style.display = 'none';
+            document.getElementById('statusText').textContent = 'SYS_HALTED';
+            isRunning = false;
+        }
+
+        function renderState(s) {
+            const m = Math.floor(s.elapsed / 60); const sec = s.elapsed % 60;
+            document.getElementById('elapsed').textContent = String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+
+            const names = ['orion', 'lyra', 'vega'];
+            s.agents.forEach((a, i) => {
+                const key = names[i];
+                document.getElementById(`bal-${key}`).textContent = a.balance.toFixed(4) + '◎';
+                const pct = a.maxBalance > 0 ? Math.min(100, (a.balance / a.maxBalance) * 100) : 0;
+                document.getElementById(`bar-${key}`).style.width = pct + '%';
+                document.getElementById(`txs-${key}`).textContent = a.txCount;
+
+                const rEl = document.getElementById(`rate-${key}`);
+                if (a.txCount > 0) {
+                    rEl.textContent = a.successRate.toFixed(0) + '%';
+                    rEl.style.color = a.successRate >= 70 ? 'var(--green)' : a.successRate >= 40 ? 'var(--amber)' : 'var(--red)';
+                }
+
+                const regEl = document.getElementById(`regime-${key}`);
+                regEl.textContent = a.regime;
+                regEl.className = 'tag regime-' + a.regime;
+            });
+
+            const rat = s.aggregate.totalTxs > 0 ? (s.aggregate.successRate).toFixed(0) : '-';
+            document.getElementById('agg-txs').textContent = s.aggregate.totalTxs;
+            document.getElementById('agg-rate').textContent = rat !== '-' ? rat + '%' : '-';
+            document.getElementById('agg-sol').textContent = s.aggregate.solMoved.toFixed(4);
+
+            if (s.recentTxs && s.recentTxs.length > 0) {
+                const feed = document.getElementById('txFeed');
+                feed.innerHTML = '';
+
+                // Track intents
+                const tags = { 'TRANSFER_SOL': 'tag-sol', 'TRANSFER_SPL': 'tag-spl', 'PROGRAM_CALL': 'tag-memo', 'SWAP_TOKEN': 'tag-swap' };
+                document.querySelectorAll('.intent').forEach(e => e.classList.remove('active'));
+
+                s.recentTxs.forEach(tx => {
+                    if (tx.intentType && tags[tx.intentType]) {
+                        document.getElementById(tags[tx.intentType]).classList.add('active');
+                    }
+
+                    const row = document.createElement('div');
+                    row.className = 'tx-line';
+
+                    if (tx.success) {
+                        const isMemo = tx.intentType === 'PROGRAM_CALL';
+                        const icon = isMemo ? '[M]' : '[OK]';
+                        const cls = isMemo ? 'tx-memo' : 'tx-ok';
+                        const sig = tx.signature ? tx.signature.substring(0, 8) + '..' : '';
+                        row.innerHTML = `<span class="${cls}">${icon}</span>
+                            <span class="tx-route">${tx.from} > ${tx.to}</span>
+                            ${tx.amount > 0 ? `<span class="tx-amt">${tx.amount.toFixed(4)} SOL</span>` : ''}
+                            <span class="tx-hash">${sig}</span>`;
+                    } else {
+                        const isSwap = tx.intentType === 'SWAP_TOKEN';
+                        const err = (tx.error || 'FAIL').toUpperCase();
+                        row.innerHTML = `<span class="${isSwap ? 'tx-swap' : 'tx-err'}">${isSwap ? '[SWAP]' : '[FAIL]'}</span>
+                            <span class="tx-route">${tx.from} > ${tx.to}</span>
+                            <span class="tx-msg">${err}</span>`;
+                    }
+                    feed.appendChild(row);
+                });
+            }
+        }
+
         function startSim() {
             const pw = document.getElementById('pwInput').value;
             const dur = document.getElementById('durInput').value;
-            if (!pw || pw.length < 8) { alert('Password must be at least 8 characters'); return; }
+            if (!pw || pw.length < 8) { alert('ERR: PASSWORD MIN 8 CHARS'); return; }
 
             document.getElementById('btnStart').disabled = true;
             document.getElementById('btnStop').style.display = 'inline-block';
-            document.getElementById('statusText').textContent = 'Initializing...';
+            document.getElementById('statusText').textContent = 'BOOT SEQUENCE INIT...';
             document.getElementById('txFeed').innerHTML = '';
             isRunning = true;
 
-            // Start simulation via POST
             fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: pw, duration: parseInt(dur) }),
             }).then(r => r.json()).then(data => {
                 if (!data.ok) {
-                    document.getElementById('statusText').textContent = '❌ ' + data.error;
+                    document.getElementById('statusText').textContent = 'ERR: ' + data.error.toUpperCase();
                     document.getElementById('btnStart').disabled = false;
                     document.getElementById('btnStop').style.display = 'none';
                     isRunning = false;
                     return;
                 }
-                document.getElementById('statusText').textContent = 'Running on devnet...';
+                document.getElementById('statusText').textContent = 'REMOTE: EXECUTING';
 
-                // Connect SSE for live updates
                 eventSource = new EventSource('/api/stream');
                 eventSource.onmessage = (e) => {
                     const state = JSON.parse(e.data);
                     renderState(state);
                 };
-                eventSource.onerror = () => {
-                    if (isRunning) onSimEnd();
-                };
+                eventSource.onerror = () => { if (isRunning) onSimEnd(); };
             }).catch(err => {
-                document.getElementById('statusText').textContent = '❌ ' + err.message;
+                document.getElementById('statusText').textContent = 'ERR: ' + err.message.toUpperCase();
                 document.getElementById('btnStart').disabled = false;
                 isRunning = false;
             });
@@ -746,74 +841,6 @@
         function stopSim() {
             fetch('/api/stop', { method: 'POST' });
             onSimEnd();
-        }
-
-        function onSimEnd() {
-            if (eventSource) { eventSource.close(); eventSource = null; }
-            document.getElementById('btnStart').disabled = false;
-            document.getElementById('btnStop').style.display = 'none';
-            document.getElementById('statusText').textContent = 'Simulation ended';
-            const dot = document.getElementById('netDot');
-            dot.style.background = '#64748b';
-            dot.style.boxShadow = 'none';
-            isRunning = false;
-        }
-
-        function renderState(s) {
-            // Elapsed
-            const m = Math.floor(s.elapsed / 60);
-            const sec = s.elapsed % 60;
-            document.getElementById('elapsed').textContent =
-                String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
-
-            // Agents
-            const names = ['alpha', 'beta', 'gamma'];
-            s.agents.forEach((a, i) => {
-                const key = names[i];
-                document.getElementById(`bal-${key}`).textContent = a.balance.toFixed(6);
-                const pct = a.maxBalance > 0 ? Math.min(100, (a.balance / a.maxBalance) * 100) : 0;
-                document.getElementById(`bar-${key}`).style.width = pct + '%';
-                document.getElementById(`txs-${key}`).textContent = a.txCount;
-
-                const rateEl = document.getElementById(`rate-${key}`);
-                if (a.txCount > 0) {
-                    rateEl.textContent = a.successRate.toFixed(0) + '%';
-                    rateEl.style.color = a.successRate >= 70 ? 'var(--green)' : a.successRate >= 40 ? 'var(--amber)' : 'var(--red)';
-                }
-
-                const regimeEl = document.getElementById(`regime-${key}`);
-                regimeEl.textContent = a.regime;
-                regimeEl.className = 'regime-tag regime-' + a.regime;
-            });
-
-            // Aggregate
-            document.getElementById('agg-txs').textContent = s.aggregate.totalTxs;
-            document.getElementById('agg-rate').textContent = s.aggregate.totalTxs > 0
-                ? s.aggregate.successRate.toFixed(1) + '%' : '—';
-            document.getElementById('agg-sol').textContent = s.aggregate.solMoved.toFixed(6);
-
-            // Transactions
-            if (s.recentTxs && s.recentTxs.length > 0) {
-                const feed = document.getElementById('txFeed');
-                feed.innerHTML = '';
-                s.recentTxs.forEach(tx => {
-                    const row = document.createElement('div');
-                    row.className = 'tx-row';
-                    if (tx.success) {
-                        const sig = tx.signature ? tx.signature.substring(0, 8) + '..' : '';
-                        row.innerHTML = `<span class="tx-icon ok">✓</span>
-          <span class="tx-route">${tx.from} → ${tx.to}</span>
-          <span class="tx-amount">${tx.amount.toFixed(6)} SOL</span>
-          <span class="tx-sig">${sig}</span>`;
-                    } else {
-                        const err = (tx.error || 'failed').substring(0, 30);
-                        row.innerHTML = `<span class="tx-icon fail">✗</span>
-          <span class="tx-route">${tx.from} → ${tx.to}</span>
-          <span class="tx-err">${err}</span>`;
-                    }
-                    feed.appendChild(row);
-                });
-            }
         }
     </script>
 </body>

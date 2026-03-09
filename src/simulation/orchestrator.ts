@@ -2,9 +2,9 @@ import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { AgentWalletRuntime } from '../wallet/runtime';
 import { PolicyEngine, CONSERVATIVE_POLICY, STANDARD_POLICY } from '../wallet/policy';
 import { TransactionSigner } from '../wallet/signer';
-import { AlphaAgent } from '../agents/alpha-agent';
-import { BetaAgent } from '../agents/beta-agent';
-import { GammaAgent } from '../agents/gamma-agent';
+import { OrionAgent } from '../agents/orion-agent';
+import { LyraAgent } from '../agents/lyra-agent';
+import { VegaAgent } from '../agents/vega-agent';
 import { BaseAgent } from '../agents/base-agent';
 import { AgentDatabase } from '../db';
 import { createSystemLogger, setDashboardMode } from '../logger';
@@ -73,34 +73,34 @@ export class SimulationOrchestrator {
         // 3. Create TransactionSigner and policy engines
         const signer = new TransactionSigner(this.runtime, this.connection, this.db);
 
-        const alphaPolicy = CONSERVATIVE_POLICY(0);
-        const betaPolicy = STANDARD_POLICY(1);
-        const gammaPolicy = STANDARD_POLICY(2);
+        const orionPolicy = CONSERVATIVE_POLICY(0);
+        const lyraPolicy = STANDARD_POLICY(1);
+        const vegaPolicy = STANDARD_POLICY(2);
 
-        const alphaPolicyEngine = new PolicyEngine(alphaPolicy, this.db);
-        const betaPolicyEngine = new PolicyEngine(betaPolicy, this.db);
-        const gammaPolicyEngine = new PolicyEngine(gammaPolicy, this.db);
+        const orionPolicyEngine = new PolicyEngine(orionPolicy, this.db);
+        const lyraPolicyEngine = new PolicyEngine(lyraPolicy, this.db);
+        const vegaPolicyEngine = new PolicyEngine(vegaPolicy, this.db);
 
-        signer.registerPolicy(0, alphaPolicyEngine);
-        signer.registerPolicy(1, betaPolicyEngine);
-        signer.registerPolicy(2, gammaPolicyEngine);
+        signer.registerPolicy(0, orionPolicyEngine);
+        signer.registerPolicy(1, lyraPolicyEngine);
+        signer.registerPolicy(2, vegaPolicyEngine);
 
         // 4. Get public keys for all agents
-        const alphaPublicKey = this.runtime.getPublicKey(0);
-        const betaPublicKey = this.runtime.getPublicKey(1);
-        const gammaPublicKey = this.runtime.getPublicKey(2);
+        const orionPublicKey = this.runtime.getPublicKey(0);
+        const lyraPublicKey = this.runtime.getPublicKey(1);
+        const vegaPublicKey = this.runtime.getPublicKey(2);
 
         // Build address → name map for transaction feed
-        AGENT_NAMES[alphaPublicKey] = 'ALPHA';
-        AGENT_NAMES[betaPublicKey] = 'BETA';
-        AGENT_NAMES[gammaPublicKey] = 'GAMMA';
+        AGENT_NAMES[orionPublicKey] = 'ORION';
+        AGENT_NAMES[lyraPublicKey] = 'LYRA';
+        AGENT_NAMES[vegaPublicKey] = 'VEGA';
 
         logger.info('Agent wallets derived', {
             event: 'WALLETS_DERIVED',
             data: {
-                alpha: alphaPublicKey,
-                beta: betaPublicKey,
-                gamma: gammaPublicKey,
+                orion: orionPublicKey,
+                lyra: lyraPublicKey,
+                vega: vegaPublicKey,
             },
         });
 
@@ -122,50 +122,50 @@ export class SimulationOrchestrator {
         }
 
         // 6. Instantiate agents
-        const alpha = new AlphaAgent(
+        const orion = new OrionAgent(
             {
                 agentId: 0,
-                name: 'ALPHA',
+                name: 'ORION',
                 signer,
                 runtime: this.runtime,
                 connection: this.connection,
                 db: this.db,
                 intervalMs: 8000,
-                policy: alphaPolicy,
+                policy: orionPolicy,
             },
-            betaPublicKey
+            lyraPublicKey
         );
 
-        const beta = new BetaAgent(
+        const lyra = new LyraAgent(
             {
                 agentId: 1,
-                name: 'BETA',
+                name: 'LYRA',
                 signer,
                 runtime: this.runtime,
                 connection: this.connection,
                 db: this.db,
                 intervalMs: 12000,
-                policy: betaPolicy,
+                policy: lyraPolicy,
             },
-            gammaPublicKey
+            vegaPublicKey
         );
 
-        const gamma = new GammaAgent(
+        const vega = new VegaAgent(
             {
                 agentId: 2,
-                name: 'GAMMA',
+                name: 'VEGA',
                 signer,
                 runtime: this.runtime,
                 connection: this.connection,
                 db: this.db,
                 intervalMs: 15000,
-                policy: gammaPolicy,
+                policy: vegaPolicy,
             },
-            alphaPublicKey,
-            betaPublicKey
+            orionPublicKey,
+            lyraPublicKey
         );
 
-        this.agents = [alpha, beta, gamma];
+        this.agents = [orion, lyra, vega];
 
         // 7. Log each agent's public key and initial balance; record starting balances
         for (const agent of this.agents) {
@@ -349,13 +349,13 @@ export class SimulationOrchestrator {
                 // Determine regime label based on agent type
                 let regime = 'normal';
                 const name = agent.getName();
-                if (name === 'ALPHA') {
+                if (name === 'ORION') {
                     if (perf.successRate >= 0.70) regime = 'hot';
                     else if (perf.successRate <= 0.30 && perf.totalActions > 0) regime = 'cold';
                     else regime = 'normal';
-                } else if (name === 'BETA') {
+                } else if (name === 'LYRA') {
                     regime = perf.balanceTrend;
-                } else if (name === 'GAMMA') {
+                } else if (name === 'VEGA') {
                     regime = perf.totalActions === 0 ? 'observing' : 'active';
                 }
 

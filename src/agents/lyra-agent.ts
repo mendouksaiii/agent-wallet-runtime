@@ -3,27 +3,27 @@ import { TransactionIntent } from '../wallet/signer';
 import { MINTS } from '../integrations/jupiter';
 
 /**
- * BETA Agent — Smart Accumulator + Jupiter DEX Trader
+ * LYRA Agent — Smart Accumulator + Jupiter DEX Trader
  *
  * Tracks balance trend over recent cycles and decides when to forward
- * excess SOL to GAMMA. Every 5th active cycle, swaps 0.01 SOL → USDC
+ * excess SOL to VEGA. Every 5th active cycle, swaps 0.01 SOL → USDC
  * via Jupiter DEX instead of forwarding (requires mainnet liquidity).
  *
  * Strategy:
  * - Track balance trend from DB (rising/stable/falling)
- * - Rising: forward 20% of excess to GAMMA
+ * - Rising: forward 20% of excess to VEGA
  * - Stable/falling: only forward if balance > 2× baseline
  * - Never forward if it would drop below safety reserve
  * - Every 5th active cycle with enough balance → SWAP_TOKEN (Jupiter)
  */
-export class BetaAgent extends BaseAgent {
-    private readonly gammaPublicKey: string;
+export class LyraAgent extends BaseAgent {
+    private readonly vegaPublicKey: string;
     private startingBalance: number | null = null;
     private activeCount: number = 0;
 
-    constructor(config: AgentConfig, gammaPublicKey: string) {
+    constructor(config: AgentConfig, vegaPublicKey: string) {
         super(config);
-        this.gammaPublicKey = gammaPublicKey;
+        this.vegaPublicKey = vegaPublicKey;
     }
 
     async decideIntent(): Promise<TransactionIntent | null> {
@@ -36,7 +36,7 @@ export class BetaAgent extends BaseAgent {
         const safetyReserve = 0.03;
 
         if (balance <= safetyReserve) {
-            this.logger.info(`BETA: balance=${balance.toFixed(6)} SOL — at safety reserve, idling`, {
+            this.logger.info(`LYRA: balance=${balance.toFixed(6)} SOL — at safety reserve, idling`, {
                 event: 'INTENT_DECIDED',
                 data: { balance, safetyReserve, reason: 'safety_reserve' },
             });
@@ -55,7 +55,7 @@ export class BetaAgent extends BaseAgent {
             reason = 'rising_trend_forward';
 
             this.logger.info(
-                `BETA [rising]: balance=${balance.toFixed(6)}, baseline=${baseline.toFixed(6)}, ` +
+                `LYRA [rising]: balance=${balance.toFixed(6)}, baseline=${baseline.toFixed(6)}, ` +
                 `excess=${excess.toFixed(6)} → forwarding ${transferAmount.toFixed(6)} SOL (20% of excess)`,
                 {
                     event: 'BALANCE_TREND',
@@ -67,7 +67,7 @@ export class BetaAgent extends BaseAgent {
             reason = 'doubled_baseline_forward';
 
             this.logger.info(
-                `BETA [doubled]: balance=${balance.toFixed(6)} > 2×baseline=${(baseline * 2).toFixed(6)} ` +
+                `LYRA [doubled]: balance=${balance.toFixed(6)} > 2×baseline=${(baseline * 2).toFixed(6)} ` +
                 `→ forwarding ${transferAmount.toFixed(6)} SOL`,
                 {
                     event: 'BALANCE_TREND',
@@ -76,7 +76,7 @@ export class BetaAgent extends BaseAgent {
             );
         } else {
             this.logger.info(
-                `BETA [holding]: balance=${balance.toFixed(6)}, baseline=${baseline.toFixed(6)}, ` +
+                `LYRA [holding]: balance=${balance.toFixed(6)}, baseline=${baseline.toFixed(6)}, ` +
                 `trend=${perf.balanceTrend}, excess=${excess.toFixed(6)} → accumulating`,
                 {
                     event: 'INTENT_DECIDED',
@@ -93,7 +93,7 @@ export class BetaAgent extends BaseAgent {
         }
 
         if (transferAmount < 0.002) {
-            this.logger.info(`BETA: computed transfer too small (${transferAmount}), idling`, {
+            this.logger.info(`LYRA: computed transfer too small (${transferAmount}), idling`, {
                 event: 'INTENT_DECIDED',
                 data: { transferAmount, reason: 'amount_too_small' },
             });
@@ -103,11 +103,11 @@ export class BetaAgent extends BaseAgent {
         this.activeCount++;
 
         // Every 5th active cycle: swap SOL → USDC via Jupiter DEX
-        // NOTE: devnet has sparse liquidity; works reliably on mainnet-beta.
+        // NOTE: devnet has sparse liquidity; works reliably on mainnet-lyra.
         if (this.activeCount % 5 === 0 && balance > 0.05) {
             const swapLamports = 10_000_000; // 0.01 SOL in lamports
             this.logger.info(
-                `BETA [Jupiter]: cycle=${this.activeCount} → SWAP_TOKEN 0.01 SOL → USDC`,
+                `LYRA [Jupiter]: cycle=${this.activeCount} → SWAP_TOKEN 0.01 SOL → USDC`,
                 {
                     event: 'INTENT_DECIDED',
                     data: { balance, activeCount: this.activeCount, swapLamports, reason: 'jupiter_swap' },
@@ -120,23 +120,23 @@ export class BetaAgent extends BaseAgent {
                 inputMint: MINTS.SOL,
                 outputMint: MINTS.USDC,
                 slippageBps: 100, // 1% slippage — more forgiving for sparse devnet liquidity
-                memo: `BETA Jupiter swap 0.01 SOL→USDC cycle=${this.activeCount}`,
+                memo: `LYRA Jupiter swap 0.01 SOL→USDC cycle=${this.activeCount}`,
             };
         }
 
         this.logger.info(
-            `BETA → GAMMA: forwarding ${transferAmount.toFixed(6)} SOL (${reason})`,
+            `LYRA → VEGA: forwarding ${transferAmount.toFixed(6)} SOL (${reason})`,
             {
                 event: 'INTENT_DECIDED',
-                data: { balance, baseline, transferAmount, reason, target: 'GAMMA' },
+                data: { balance, baseline, transferAmount, reason, target: 'VEGA' },
             }
         );
 
         return {
             type: 'TRANSFER_SOL',
-            toAddress: this.gammaPublicKey,
+            toAddress: this.vegaPublicKey,
             amountSol: transferAmount,
-            memo: `BETA→GAMMA ${reason} ${transferAmount} SOL`,
+            memo: `LYRA→VEGA ${reason} ${transferAmount} SOL`,
         };
     }
 }

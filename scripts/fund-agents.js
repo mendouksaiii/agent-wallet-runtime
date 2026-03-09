@@ -62,7 +62,7 @@ async function main() {
     const mnemonic = loadMnemonic(password, keystorePath);
     const runtime = new AgentWalletRuntime(mnemonic);
     const connection = runtime.getConnection();
-    const names = ['ALPHA', 'BETA', 'GAMMA'];
+    const names = ['ORION', 'LYRA', 'VEGA'];
 
     for (let i = 0; i < 3; i++) {
         const pubkey = runtime.deriveAgentKeypair(i).publicKey;

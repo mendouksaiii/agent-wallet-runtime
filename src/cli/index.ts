@@ -61,7 +61,7 @@ program
             console.log('Derived Agent Wallets:');
             console.log('─────────────────────────────────────────────────');
             for (const agent of agents) {
-                const names = ['ALPHA (Market Maker)', 'BETA (Accumulator)', 'GAMMA (Rebalancer)'];
+                const names = ['ORION (Market Maker)', 'LYRA (Accumulator)', 'VEGA (Rebalancer)'];
                 console.log(`  Agent ${agent.agentId} — ${names[agent.agentId]}`);
                 console.log(`    Public Key: ${agent.publicKey}`);
                 console.log(`    Path:       ${agent.derivationPath}`);
@@ -144,7 +144,7 @@ program
             const mnemonic = loadMnemonic(options.password, keystorePath);
             const runtime = new AgentWalletRuntime(mnemonic);
             const connection = runtime.getConnection();
-            const names = ['ALPHA', 'BETA', 'GAMMA'];
+            const names = ['ORION', 'LYRA', 'VEGA'];
 
             console.log('\n📊 Agent Wallet Status (Solana Devnet)');
             console.log('═══════════════════════════════════════════════════════');
@@ -204,7 +204,7 @@ program
         try {
             const agentId = parseInt(options.agent, 10);
             const limit = parseInt(options.limit, 10);
-            const names: Record<number, string> = { 0: 'ALPHA', 1: 'BETA', 2: 'GAMMA' };
+            const names: Record<number, string> = { 0: 'ORION', 1: 'LYRA', 2: 'VEGA' };
             const agentName = names[agentId] || `Agent ${agentId}`;
 
             const db = await AgentDatabase.create();
@@ -260,7 +260,7 @@ program
             const keystorePath = process.env.KEYSTORE_PATH || './keystore.enc';
             const mnemonic = loadMnemonic(options.password, keystorePath);
             const agentId = parseInt(options.agent, 10);
-            const names: Record<number, string> = { 0: 'ALPHA', 1: 'BETA', 2: 'GAMMA' };
+            const names: Record<number, string> = { 0: 'ORION', 1: 'LYRA', 2: 'VEGA' };
 
             console.log(`\n💰 Requesting airdrop for ${names[agentId] || `Agent ${agentId}`}...`);
 

@@ -17,7 +17,7 @@
 **[0:00 - 0:30] The Hook & Demo**
 "Hey everyone, this is Agent Wallet Runtime — an autonomous AI wallet infrastructure built for Solana. 
 
-What you're looking at right now is our live devnet dashboard. We have three autonomous agents—Alpha, Beta, and Gamma—actively making financial decisions and executing transactions on-chain. 
+What you're looking at right now is our live devnet dashboard. We have three autonomous agents—Orion, Lyra, and Vega—actively making financial decisions and executing transactions on-chain. 
 
 The core problem we're solving is security. Right now, most 'AI agents' hold a plaintext private key in a Python script. If the script gets hacked, the wallet is drained. We built a system where agents never touch the private key."
 
@@ -34,9 +34,9 @@ Only if the policy passes AND the simulation succeeds does the runtime finally s
 
 **[1:00 - 1:30] The Agents & Jupiter DEX**
 "Here you can see our agents operating in different regimes based on their historical success rates. 
-- Alpha is a Momentum Market Maker.
-- Beta is a Smart Accumulator that integrates directly with the Jupiter v6 API to swap excess SOL for USDC.
-- Gamma acts as a Rebalancer.
+- Orion is a Momentum Market Maker.
+- Lyra is a Smart Accumulator that integrates directly with the Jupiter v6 API to swap excess SOL for USDC.
+- Vega acts as a Rebalancer.
 
 You can see in the transaction feed here that transactions are sometimes rejected by the policy engine—like Daily Spend caps being hit—or simulation failures. This proves the security gate is actively working."
 

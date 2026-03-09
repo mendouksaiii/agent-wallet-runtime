@@ -20,9 +20,9 @@ export { saveMnemonic, loadMnemonic, generateAndSave, KeystoreError } from './wa
 // Agent layer
 export { BaseAgent } from './agents/base-agent';
 export type { AgentConfig } from './agents/base-agent';
-export { AlphaAgent } from './agents/alpha-agent';
-export { BetaAgent } from './agents/beta-agent';
-export { GammaAgent } from './agents/gamma-agent';
+export { OrionAgent } from './agents/orion-agent';
+export { LyraAgent } from './agents/lyra-agent';
+export { VegaAgent } from './agents/vega-agent';
 
 // Orchestration
 export { SimulationOrchestrator } from './simulation/orchestrator';

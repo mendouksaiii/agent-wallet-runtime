@@ -120,7 +120,7 @@ async function run() {
         fail('Devnet connection failed: ' + e.message);
     }
 
-    const agentNames = ['ALPHA', 'BETA', 'GAMMA'];
+    const agentNames = ['ORION', 'LYRA', 'VEGA'];
     for (const agent of agentKeys) {
         try {
             const bal = await connection.getBalance(agent.kp.publicKey);
@@ -141,27 +141,27 @@ async function run() {
     const db = await AgentDatabase.create();
     ok('AgentDatabase.create() succeeded');
 
-    const alphaPolicy = CONSERVATIVE_POLICY(0);
-    const betaPolicy = STANDARD_POLICY(1);
-    ok('Policy configs created for ALPHA (conservative) and BETA (standard)');
+    const orionPolicy = CONSERVATIVE_POLICY(0);
+    const lyraPolicy = STANDARD_POLICY(1);
+    ok('Policy configs created for ORION (conservative) and LYRA (standard)');
 
-    const alphaPolicyEngine = new PolicyEngine(alphaPolicy, db);
-    const betaPolicyEngine = new PolicyEngine(betaPolicy, db);
+    const orionPolicyEngine = new PolicyEngine(orionPolicy, db);
+    const lyraPolicyEngine = new PolicyEngine(lyraPolicy, db);
 
-    // Test: ALPHA's conservative limit
-    const alphaLimit = alphaPolicy.maxSolPerTransaction;
-    ok('ALPHA max per tx: ' + alphaLimit + ' SOL');
+    // Test: ORION's conservative limit
+    const orionLimit = orionPolicy.maxSolPerTransaction;
+    ok('ORION max per tx: ' + orionLimit + ' SOL');
 
-    const check1 = alphaPolicyEngine.validate(0, alphaLimit * 0.5);
-    if (check1.allowed) ok('ALPHA: 50% of limit → allowed');
-    else fail('ALPHA: 50% of limit → wrongly rejected: ' + check1.reason);
+    const check1 = orionPolicyEngine.validate(0, orionLimit * 0.5);
+    if (check1.allowed) ok('ORION: 50% of limit → allowed');
+    else fail('ORION: 50% of limit → wrongly rejected: ' + check1.reason);
 
-    const check2 = alphaPolicyEngine.validate(0, alphaLimit * 2);
-    if (!check2.allowed) ok('ALPHA: 200% of limit → rejected (' + check2.reason + ')');
-    else fail('ALPHA: 200% of limit → wrongly allowed!');
+    const check2 = orionPolicyEngine.validate(0, orionLimit * 2);
+    if (!check2.allowed) ok('ORION: 200% of limit → rejected (' + check2.reason + ')');
+    else fail('ORION: 200% of limit → wrongly allowed!');
 
     // Test: unlisted program
-    const check3 = alphaPolicyEngine.validate(0, 0.001, '11111111111111111111111111111111');
+    const check3 = orionPolicyEngine.validate(0, 0.001, '11111111111111111111111111111111');
     // System program should always be allowed
     if (check3.allowed) ok('System Program always allowed');
     else warn('System Program rejected: ' + check3.reason);
@@ -271,18 +271,18 @@ async function run() {
     else fail('Memo Program ID missing from signer');
 
     section('LAYER 9 — Adaptive Agent Logic');
-    const alpha = fs.readFileSync('./src/agents/alpha-agent.ts', 'utf8');
-    const beta = fs.readFileSync('./src/agents/beta-agent.ts', 'utf8');
-    const gamma = fs.readFileSync('./src/agents/gamma-agent.ts', 'utf8');
+    const orion = fs.readFileSync('./src/agents/orion-agent.ts', 'utf8');
+    const lyra = fs.readFileSync('./src/agents/lyra-agent.ts', 'utf8');
+    const vega = fs.readFileSync('./src/agents/vega-agent.ts', 'utf8');
 
-    if (alpha.includes('getRecentPerformance')) ok('ALPHA reads DB performance metrics (adaptive)');
-    else fail('ALPHA does NOT read performance — not adaptive');
-    if (alpha.includes('hot') || alpha.includes('regime')) ok('ALPHA has regime logic');
-    else fail('ALPHA missing regime logic');
-    if (beta.includes('balanceTrend')) ok('BETA checks balance trend (smart accumulator)');
-    else fail('BETA does NOT check balance trend');
-    if (gamma.includes('needScore') || gamma.includes('need')) ok('GAMMA calculates need scores (rebalancer)');
-    else fail('GAMMA missing need score logic');
+    if (orion.includes('getRecentPerformance')) ok('ORION reads DB performance metrics (adaptive)');
+    else fail('ORION does NOT read performance — not adaptive');
+    if (orion.includes('hot') || orion.includes('regime')) ok('ORION has regime logic');
+    else fail('ORION missing regime logic');
+    if (lyra.includes('balanceTrend')) ok('LYRA checks balance trend (smart accumulator)');
+    else fail('LYRA does NOT check balance trend');
+    if (vega.includes('needScore') || vega.includes('need')) ok('VEGA calculates need scores (rebalancer)');
+    else fail('VEGA missing need score logic');
 
     // ── Summary
     console.log('\n══════════════════════════════════════════════');

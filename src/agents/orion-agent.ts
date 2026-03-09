@@ -2,7 +2,7 @@ import { BaseAgent, AgentConfig } from './base-agent';
 import { TransactionIntent } from '../wallet/signer';
 
 /**
- * ALPHA Agent — Momentum Market Maker
+ * ORION Agent — Momentum Market Maker
  *
  * Adapts transfer probability and amount based on recent performance.
  * Hot streak → send more aggressively. Cold streak → pull back.
@@ -15,13 +15,13 @@ import { TransactionIntent } from '../wallet/signer';
  * - Otherwise: "normal" → 65% probability, moderate amounts
  * - Amount = balance × (baseFactor + successRate × scaleFactor)
  */
-export class AlphaAgent extends BaseAgent {
-    private readonly betaPublicKey: string;
+export class OrionAgent extends BaseAgent {
+    private readonly lyraPublicKey: string;
     private cycleCount: number = 0;
 
-    constructor(config: AgentConfig, betaPublicKey: string) {
+    constructor(config: AgentConfig, lyraPublicKey: string) {
         super(config);
-        this.betaPublicKey = betaPublicKey;
+        this.lyraPublicKey = lyraPublicKey;
     }
 
     async decideIntent(): Promise<TransactionIntent | null> {
@@ -29,7 +29,7 @@ export class AlphaAgent extends BaseAgent {
 
         // Hard floor — never operate below 0.03 SOL
         if (balance < 0.03) {
-            this.logger.info(`ALPHA: balance=${balance.toFixed(6)} SOL — below safety floor, idling`, {
+            this.logger.info(`ORION: balance=${balance.toFixed(6)} SOL — below safety floor, idling`, {
                 event: 'INTENT_DECIDED',
                 data: { balance, reason: 'safety_floor' },
             });
@@ -79,7 +79,7 @@ export class AlphaAgent extends BaseAgent {
 
         if (roll > sendProbability) {
             this.logger.info(
-                `ALPHA [${regime}]: roll=${roll.toFixed(3)} > prob=${sendProbability.toFixed(2)} → idling ` +
+                `ORION [${regime}]: roll=${roll.toFixed(3)} > prob=${sendProbability.toFixed(2)} → idling ` +
                 `(successRate=${(perf.successRate * 100).toFixed(0)}%, streak: +${perf.consecutiveSuccesses}/-${perf.consecutiveFailures})`,
                 {
                     event: 'INTENT_DECIDED',
@@ -94,7 +94,7 @@ export class AlphaAgent extends BaseAgent {
         const amountSol = parseFloat(Math.max(0.001, Math.min(rawAmount, 0.01)).toFixed(6));
 
         this.logger.info(
-            `ALPHA [${regime}]: roll=${roll.toFixed(3)} ≤ prob=${sendProbability.toFixed(2)} → sending ${amountSol} SOL to BETA ` +
+            `ORION [${regime}]: roll=${roll.toFixed(3)} ≤ prob=${sendProbability.toFixed(2)} → sending ${amountSol} SOL to LYRA ` +
             `(successRate=${(perf.successRate * 100).toFixed(0)}%, avgAmt=${perf.avgAmount.toFixed(4)}, trend=${perf.balanceTrend})`,
             {
                 event: 'INTENT_DECIDED',
@@ -104,7 +104,7 @@ export class AlphaAgent extends BaseAgent {
                     avgAmount: perf.avgAmount,
                     trend: perf.balanceTrend,
                     streak: `+${perf.consecutiveSuccesses}/-${perf.consecutiveFailures}`,
-                    target: 'BETA',
+                    target: 'LYRA',
                     reason: 'momentum_send',
                 },
             }
@@ -114,7 +114,7 @@ export class AlphaAgent extends BaseAgent {
         this.cycleCount++;
         if (this.cycleCount % 4 === 0) {
             this.logger.info(
-                `ALPHA [${regime}]: cycle=${this.cycleCount} → PROGRAM_CALL (Memo) ` +
+                `ORION [${regime}]: cycle=${this.cycleCount} → PROGRAM_CALL (Memo) ` +
                 `successRate=${(perf.successRate * 100).toFixed(0)}%`,
                 {
                     event: 'INTENT_DECIDED',
@@ -124,15 +124,15 @@ export class AlphaAgent extends BaseAgent {
 
             return {
                 type: 'PROGRAM_CALL',
-                memo: `ALPHA regime=${regime} sr=${(perf.successRate * 100).toFixed(0)}% bal=${balance.toFixed(4)} cyc=${this.cycleCount}`,
+                memo: `ORION regime=${regime} sr=${(perf.successRate * 100).toFixed(0)}% bal=${balance.toFixed(4)} cyc=${this.cycleCount}`,
             };
         }
 
         return {
             type: 'TRANSFER_SOL',
-            toAddress: this.betaPublicKey,
+            toAddress: this.lyraPublicKey,
             amountSol,
-            memo: `ALPHA→BETA ${regime}_momentum ${amountSol} SOL`,
+            memo: `ORION→LYRA ${regime}_momentum ${amountSol} SOL`,
         };
     }
 }
