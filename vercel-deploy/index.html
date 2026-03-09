@@ -101,6 +101,13 @@
             font-size: 24px;
             color: var(--bg-base);
             box-shadow: 4px 4px 0px var(--purple), 8px 8px 0px var(--cyan);
+            overflow: hidden;
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .title {
@@ -530,7 +537,7 @@
     <div class="app">
         <header class="header block-3d">
             <div class="header-left">
-                <div class="logo-box heading-font">AW</div>
+                <div class="logo-box heading-font"><img src="logo.png" alt="AW"></div>
                 <div>
                     <h1 class="title heading-font">Agent Wallet Runtime</h1>
                     <div class="subtitle">SYS.VER: DEFI-VOXEL-OS // DEVNET</div>
