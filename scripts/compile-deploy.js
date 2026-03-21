@@ -79,28 +79,31 @@ async function main() {
     const bytecode = '0x' + compiled.evm.bytecode.object;
     console.log('✅ Compiled successfully. Bytecode size:', bytecode.length / 2, 'bytes');
 
-    // Step 2: Connect to Base Sepolia
-    const RPC_URL = 'https://sepolia.base.org';
+    // Step 2: Connect to Ethereum Sepolia
+    const RPC_URL = 'https://ethereum-sepolia-rpc.publicnode.com';
     const provider = new ethers.JsonRpcProvider(RPC_URL);
 
-    // Generate a deployer wallet
+    // Load deployer wallet from env var or .env.deployer file
+    let privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+    if (!privateKey) {
+        const envPath = path.resolve(__dirname, '..', '.env.deployer');
+        if (fs.existsSync(envPath)) {
+            const envContent = fs.readFileSync(envPath, 'utf-8');
+            const match = envContent.match(/DEPLOYER_PRIVATE_KEY=(.*)/);
+            if (match) privateKey = match[1].trim();
+        }
+    }
+
     let wallet;
-    if (process.env.DEPLOYER_PRIVATE_KEY) {
-        wallet = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
+    if (privateKey) {
+        wallet = new ethers.Wallet(privateKey, provider);
     } else {
         wallet = ethers.Wallet.createRandom().connect(provider);
         console.log('\n⚠️  Generated fresh deployer wallet.');
         console.log('Address:', wallet.address);
-        console.log('Private key:', wallet.privateKey);
-        console.log('\nFund this address with Base Sepolia ETH from:');
-        console.log('  https://www.alchemy.com/faucets/base-sepolia');
-        console.log('  https://faucet.quicknode.com/base/sepolia');
-        console.log('\nThen re-run: DEPLOYER_PRIVATE_KEY=<key> node scripts/compile-deploy.js');
-        
-        // Save the key for convenience
         const envPath = path.resolve(__dirname, '..', '.env.deployer');
         fs.writeFileSync(envPath, `DEPLOYER_PRIVATE_KEY=${wallet.privateKey}\nDEPLOYER_ADDRESS=${wallet.address}\n`);
-        console.log('\nSaved deployer wallet to .env.deployer');
+        console.log('Saved to .env.deployer. Fund it and re-run.');
         return;
     }
 
@@ -122,7 +125,7 @@ async function main() {
     const address = await contract.getAddress();
     console.log('✅ Deployed!');
     console.log('Contract:', address);
-    console.log('Explorer: https://sepolia.basescan.org/address/' + address);
+    console.log('Explorer: https://sepolia.etherscan.io/address/' + address);
 
     // Step 4: Submit a test receipt
     console.log('\n--- Submitting test receipt ---');
@@ -139,7 +142,7 @@ async function main() {
     const receipt = await tx.wait();
     console.log('✅ Receipt submitted!');
     console.log('Tx:', receipt.hash);
-    console.log('Explorer: https://sepolia.basescan.org/tx/' + receipt.hash);
+    console.log('Explorer: https://sepolia.etherscan.io/tx/' + receipt.hash);
 
     // Step 5: Save the deployed address
     const envSynthPath = path.resolve(__dirname, '..', '.env.synthesis');

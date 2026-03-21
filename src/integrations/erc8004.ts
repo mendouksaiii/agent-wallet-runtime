@@ -9,9 +9,9 @@ const ERC8004_REGISTRY_ABI = [
     "event ReceiptRecorded(uint256 indexed agentId, uint256 receiptId, string actionType)"
 ];
 
-// Mock deployed address on Filecoin Calibration testnet or Base Sepolia
-// Users should override this via process.env.ERC8004_REGISTRY_ADDRESS
-const DEFAULT_REGISTRY_ADDRESS = '0x1111111111111111111111111111111111111111';
+// Deployed on Ethereum Sepolia — verified on etherscan
+// https://sepolia.etherscan.io/address/0xEe467b25DA5182D9b035f48596b8f17521c70011
+const DEFAULT_REGISTRY_ADDRESS = '0xEe467b25DA5182D9b035f48596b8f17521c70011';
 
 export class Erc8004Client {
     private registryContract: ethers.Contract;
@@ -36,8 +36,6 @@ export class Erc8004Client {
                 data: { agentId, actionType }
             });
 
-            // Note: If the default address is used and no contract exists there, 
-            // the transaction will likely fail or revert. This is a scaffold for the hackathon.
             const tx = await this.registryContract.recordReceipt(agentId, actionType, receiptData);
             
             logger.info(`ERC-8004 receipt tx sent. Hash: ${tx.hash}`, {
