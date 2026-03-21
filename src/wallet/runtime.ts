@@ -14,6 +14,7 @@ import {
     TokenAccountNotFoundError,
     TokenInvalidAccountOwnerError,
 } from '@solana/spl-token';
+import { ethers } from 'ethers';
 import * as bip39 from 'bip39';
 import { derivePath } from 'ed25519-hd-key';
 import { createSystemLogger } from '../logger';
@@ -46,8 +47,11 @@ const logger = createSystemLogger();
  */
 export class AgentWalletRuntime {
     private readonly seed: Buffer;
+    private readonly mnemonicString: string;
     private readonly derivedKeypairs: Map<number, Keypair> = new Map();
+    private readonly derivedEvmWallets: Map<number, ethers.HDNodeWallet> = new Map();
     private readonly connection: Connection;
+    private readonly evmProvider: ethers.JsonRpcProvider;
 
     /**
      * Creates a new wallet runtime from a BIP39 mnemonic.
@@ -61,10 +65,23 @@ export class AgentWalletRuntime {
         }
 
         this.seed = bip39.mnemonicToSeedSync(mnemonic);
+        this.mnemonicString = mnemonic;
         this.connection = new Connection(
             rpcUrl || process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'),
             'confirmed'
         );
+        this.evmProvider = new ethers.JsonRpcProvider(
+            process.env.EVM_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1'
+        );
+    }
+
+    /**
+     * Returns the EVM RPC provider instance.
+     *
+     * @returns JsonRpcProvider instance
+     */
+    getEvmProvider(): ethers.JsonRpcProvider {
+        return this.evmProvider;
     }
 
     /**
@@ -107,6 +124,41 @@ export class AgentWalletRuntime {
     getPublicKey(agentId: number): string {
         const keypair = this.deriveAgentKeypair(agentId);
         return keypair.publicKey.toBase58();
+    }
+
+    /**
+     * Derives a deterministic EVM wallet for a given agent ID.
+     * Uses BIP44 path: m/44'/60'/0'/0/{agentId}
+     * Caches derived wallets in memory for reuse.
+     *
+     * @param agentId - Numeric agent identifier
+     * @returns ethers.HDNodeWallet 
+     */
+    deriveEvmWallet(agentId: number): ethers.HDNodeWallet {
+        const cached = this.derivedEvmWallets.get(agentId);
+        if (cached) {
+            return cached;
+        }
+
+        const hdNode = ethers.HDNodeWallet.fromMnemonic(
+            ethers.Mnemonic.fromPhrase(this.mnemonicString)
+        );
+        const derived = hdNode.derivePath(`m/44'/60'/0'/0/${agentId}`);
+        const walletWithProvider = derived.connect(this.evmProvider);
+
+        this.derivedEvmWallets.set(agentId, walletWithProvider as ethers.HDNodeWallet);
+        return walletWithProvider as ethers.HDNodeWallet;
+    }
+
+    /**
+     * Returns the hex-encoded EVM address for a given agent ID.
+     *
+     * @param agentId - Numeric agent identifier
+     * @returns Hexadecimal Ethereum address string
+     */
+    getEvmAddress(agentId: number): string {
+        const wallet = this.deriveEvmWallet(agentId);
+        return wallet.address;
     }
 
     /**

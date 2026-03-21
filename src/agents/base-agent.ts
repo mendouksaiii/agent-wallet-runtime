@@ -8,6 +8,7 @@ import { TransactionSigner, TransactionIntent, ExecutionResult } from '../wallet
 import { AgentWalletRuntime } from '../wallet/runtime';
 import { WalletPolicy } from '../wallet/policy';
 import { createAgentLogger } from '../logger';
+import { Erc8004Client } from '../integrations/erc8004';
 
 /**
  * Configuration for constructing an agent.
@@ -161,6 +162,29 @@ export abstract class BaseAgent {
         });
 
         if (result.success) {
+            // Trigger ERC-8004 Receipt across EVM network
+            try {
+                const evmWallet = this.runtime.deriveEvmWallet(this.agentId);
+                const ercClient = new Erc8004Client(evmWallet);
+                
+                // Fire and forget cross-chain receipt so we don't block the Solana loop
+                ercClient.recordReceipt(this.agentId, intent.type, JSON.stringify({
+                    solanaTx: result.signature,
+                    amount: intent.amountSol,
+                    timestamp: cycleTimestamp
+                })).catch(e => {
+                    this.logger.error('Background ERC-8004 receipt failed', { 
+                        event: 'ERC8004_BACKGROUND_ERROR',
+                        data: { error: e.message } 
+                    });
+                });
+            } catch (err) {
+                this.logger.error('Failed to initialize EVM wallet for receipt', { 
+                    event: 'EVM_INIT_ERROR',
+                    data: { error: err instanceof Error ? err.message : String(err) } 
+                });
+            }
+
             this.logger.info('Transaction confirmed', {
                 event: 'TX_CONFIRMED',
                 data: {

@@ -57,6 +57,13 @@ flowchart TD
 | **Execution** | Simulated on-chain before real broadcast |
 | **Audit** | Every action recorded to SQLite with full context |
 
+## Protocol Labs: The Synthesis Hackathon Integrations 🏆
+
+This runtime natively supports **Protocol Labs** bounties out-of-the-box:
+
+1. **Let the Agent Cook — No Humans Required**: The `SimulationOrchestrator` runs completely headless. Agents awake, query the SQLite ledger for their historical success/failure rate, inspect their balances, securely simulate intent payloads, and broadcast fully formed transactions without any human prompt or signature. 
+2. **Agents With Receipts (ERC-8004)**: While our agents act on Solana, their wallets are bip39 deterministic. The runtime co-derives an EVM wallet (`m/44'/60'/0'/0/*`) alongside the Solana wallet (`m/44'/501'*`) using the same seed. Whenever an agent completes a job on Solana, it automatically executes a **cross-chain transaction** using `ethers` to mint a cryptographically verifiable **ERC-8004 Receipt** on an EVM registry.
+
 ## Prerequisites
 
 - **Node.js** 20+ (with npm)
